@@ -1,0 +1,590 @@
+package com.jctl.cloud.api.node;
+
+import com.google.common.collect.Maps;
+import com.jctl.cloud.common.utils.Reflections;
+import com.jctl.cloud.common.utils.excel.annotation.ExcelField;
+import com.jctl.cloud.manager.farmerland.entity.Farmland;
+import com.jctl.cloud.manager.farmerland.service.FarmlandService;
+import com.jctl.cloud.manager.node.entity.Node;
+import com.jctl.cloud.manager.node.service.NodeService;
+import com.jctl.cloud.manager.nodedatadetails.entity.NodeDataDetails;
+import com.jctl.cloud.manager.nodedatadetails.service.NodeDataDetailsService;
+import com.jctl.cloud.manager.relay.entity.Relay;
+import com.jctl.cloud.manager.relay.service.RelayService;
+import com.jctl.cloud.manager.timingstrategy.entity.NodeCollectionCycle;
+import com.jctl.cloud.manager.timingstrategy.service.NodeCollectionCycleService;
+import com.jctl.cloud.manager.waring.entity.WaringCycle;
+import com.jctl.cloud.manager.waring.service.WaringCycleService;
+import com.jctl.cloud.modules.sys.entity.Role;
+import com.jctl.cloud.modules.sys.entity.User;
+import com.jctl.cloud.modules.sys.utils.UserUtils;
+import com.jctl.cloud.utils.NodeControlUtil;
+import com.jctl.cloud.utils.QutarzUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+/**
+ * Created by 马江涛 on 2017/3/27.
+ */
+@Controller
+@RequestMapping("node")
+public class ANodeController {
+    @Autowired
+    private NodeService nodeService;
+    @Autowired
+    private NodeDataDetailsService nodeDataDetailsService;
+    @Autowired
+    private WaringCycleService waringCycleService;
+    @Autowired
+    private NodeCollectionCycleService nodeCollectionCycleService;
+    @Autowired
+    private FarmlandService farmlandService;
+    @Autowired
+    private RelayService relayService;
+
+    /**
+     * 节点详情列表
+     *
+     * @param
+     * @return
+     */
+    @RequestMapping("detailList")
+    @ResponseBody
+    public Map listNodeDetail(String farmlandId) {
+        Map result = Maps.newHashMap();
+        List lists = new ArrayList<>();
+
+        NodeDataDetails nodeDataDetails=new NodeDataDetails();
+        List<NodeDataDetails> nodeDataDetailsLists=new ArrayList<NodeDataDetails>();
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Node node=new Node();
+            node.setFarmlandId(farmlandId);
+            node.setDelFlag("1");
+            List<Node> nodeList=nodeService.findList(node);
+                if(nodeList!=null||nodeList.size()>0) {
+                    for (Node no : nodeList) {
+                    nodeDataDetails.setNodeMac(no.getNodeNum());
+                    List<NodeDataDetails>  nodeDataDetailsListTest = nodeDataDetailsService.findList(nodeDataDetails);
+                    if(nodeDataDetailsListTest != null || nodeDataDetailsListTest.size() > 0){
+                        for(NodeDataDetails da:nodeDataDetailsListTest){
+                            da.setNodeName(no.getNodeAlise());
+                            nodeDataDetailsLists.add(da);
+                        }
+                    }
+                    }
+            }
+            if (nodeDataDetailsLists != null || nodeDataDetailsLists.size() > 0) {
+                for (NodeDataDetails dataDetails : nodeDataDetailsLists) {
+                    String[] proper = new String[]{"id","nodeMac", "airTemperature", "airHumidity", "soilTemperature1","soilHumidity1","soilTemperature2","soilHumidity2","soilTemperature3","soilHumidity3","co2", "openFlag", "power", "addTime","nodeName"};
+                    Map maps = Maps.newHashMap();
+                    for (String property : proper) {
+                        if(property=="addTime"){
+                            maps.put(property,sdf.format(dataDetails.getAddTime()));
+                        }
+                       else {
+                            maps.put(property, Reflections.invokeGetter(dataDetails, property));
+                        }
+                        }
+                    lists.add(maps);
+                }
+                result.put("flag", "1");
+                result.put("info", lists);
+            } else {
+                result.put("flag", "0");
+                result.put("msg", "抱歉未查询到数据");
+            }
+        } catch (Exception e) {
+            result.put("flag", "0");
+            result.put("msg", "操作失败");
+        }
+        return result;
+    }
+
+    /**
+     * 节点管理
+     */
+    @RequestMapping("list")
+    @ResponseBody
+    public Map nodeList(Node node, String userId) {
+        Map result = Maps.newHashMap();
+        List lists = new ArrayList();
+        try {
+            List<Node> nodeList = nodeService.findList(node);
+            boolean isAdmin = User.isAdmin(userId);
+            if (!isAdmin) {
+                List<Role> list = UserUtils.getRoleList();
+                for (Role role : list) {
+                    if (role.getEnname().equals("farmerBoss")) {
+                        node.setUser(UserUtils.get(userId));
+                    }
+                    if (role.getEnname().equals("farmerWork")) {
+                        node.setUsedId(userId);
+                    }
+                }
+            }
+            if (nodeList != null || nodeList.size() > 0) {
+                String[] proper = new String[]{"id", "nodeNum", "farmlandName", "usedName", "power","nodeAlise","onOffName"};
+                for (Node no : nodeList) {
+                    Map maps = Maps.newHashMap();
+                    for (String property : proper) {
+                        maps.put(property, Reflections.invokeGetter(no, property));
+                    }
+                    lists.add(maps);
+                }
+                result.put("flag", 1);
+                result.put("info", lists);
+            } else {
+                result.put("flag", 0);
+                result.put("msg", "抱歉未查询到数据");
+            }
+        } catch (Exception e) {
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 节点详情
+     */
+    @RequestMapping("get")
+    @ResponseBody
+    public Map getNode(String id) {
+        Map result = Maps.newHashMap();
+        try {
+            List farmList=new ArrayList();
+            Farmland farmland=new Farmland();
+            Node no = nodeService.get(id);
+            String[] proper = new String[]{"id", "nodeNum", "type", "user.name", "usedName", "relayName", "cycle", "addTime", "farmlandName", "power","nodeAlise","onOffName"};
+            Map info = Maps.newHashMap();
+            for (String property : proper) {
+                if (property.equals("relayName")) {
+                    info.put("relayNum", Reflections.invokeGetter(no, property));
+                    if(property.equals("addTime")){
+                        info.put(property, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(no.getAddTime()));
+                    }
+                }else {
+                    info.put(property, Reflections.invokeGetter(no, property));
+                    if(property.equals("addTime")){
+                        info.put(property, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(no.getAddTime()));
+                    }
+
+                }
+
+            }
+            NodeDataDetails search = new NodeDataDetails();
+            search.setNodeMac((String) info.get("nodeNum"));
+            List<NodeDataDetails> dataDetails = nodeDataDetailsService.findDetail(search);
+            //大气温度       大气湿度   1号菌棒温度  1号菌棒湿度
+            String[] property1 = new String[]{"nodeMac", "airTemperature", "airHumidity","soilTemperature1","soilHumidity1","soilTemperature2","soilHumidity2","soilTemperature3","soilHumidity3", "co2", "openFlag", "power", "addTime"};
+            Map data = Maps.newHashMap();
+            for (NodeDataDetails nodeDataDetail : dataDetails) {
+                for (String property : property1) {
+                    if(property.equals("addTime")){
+                        data.put(property, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(nodeDataDetail.getAddTime()));
+                    }else {
+                        data.put(property, Reflections.invokeGetter(nodeDataDetail, property));
+                    }
+                }
+                break;
+            }
+            if(no.getRelayName()!=null) {
+               Relay relay= relayService.getByMac(no.getRelayName());
+                if(relay.getFarmer()!=null&&relay.getFarmer().getId()!=null&&!relay.getFarmer().getId().equals("")){
+                    farmland.setFarmer(relay.getFarmer());
+                    farmland.setDelFlag("1");
+                }
+                List<Farmland> farmlandList=farmlandService.findList(farmland);
+                String[] pro = new String[]{"id", "alias","usedName","usedId"};
+                for(Farmland fa:farmlandList){
+                    Map message=Maps.newHashMap();
+                    for(String p:pro) {
+                        message.put(p, Reflections.invokeGetter(fa, p));
+                    }
+                    farmList.add(message);
+                }
+            }
+             result.put("flag", 1);
+            result.put("data", data);
+            result.put("info", info);
+            result.put("farmList", farmList);
+        } catch (Exception e) {
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @RequestMapping("update")
+    @ResponseBody
+    public Map updateNode(Node node, HttpServletRequest request) {
+        Map result = Maps.newHashMap();
+        try {
+            if (node.getId() != null && node.getId() != "") {
+                Node node1=nodeService.get(node.getId());
+
+                if (node1.getRelayId() != null || node1.getRelayId() != -1) {
+                    if (node1.getFarmlandId() != null && !node1.getFarmlandId().equals("") && node1.getFarmlandId() != "-1") {
+                        Farmland farmland = new Farmland();
+                        farmland.setId(node.getFarmlandId());
+                        Relay re = relayService.get(node.getRelayId().toString());
+                        if (re.getFarmer() != null || re.getFarmer().getId() != null || re.getFarmer().getId() != "-1") {
+                            farmland.setFarmer(re.getFarmer());
+                            farmland.setRelay(re);
+                            farmlandService.updateById(farmland);
+                        }
+                    }
+
+                }
+                nodeService.save(node);
+                result.put("flag", 1);
+                result.put("msg", "修改成功");
+            }
+        } catch (Exception e) {
+            result.put("flag", 0);
+            result.put("msg", "修改失败");
+        }
+        return result;
+    }
+@RequestMapping("strategyManagerment")
+@ResponseBody
+public Map strategyManagerment(String nodeId){
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM:dd HH:mm:ss");
+    Map result=Maps.newHashMap();
+    List data=new ArrayList();
+    NodeCollectionCycle nCC = new NodeCollectionCycle();
+    Node node=nodeService.get(nodeId);
+    nCC.setNodeId(nodeId);
+    try {
+        NodeCollectionCycle nodeCollectionCycle = nodeCollectionCycleService.findByNodeId(nCC);
+        if (nodeCollectionCycle != null || nodeCollectionCycle.getCycleOn() != "" || nodeCollectionCycle.getCycleOff() != "" || nodeCollectionCycle.getCycleTime() != "") {
+            List<WaringCycle> list = waringCycleService.findList(new WaringCycle());
+            String[] property = new String[]{"id", "nodeNum", "property", "max", "min", "cycle"};
+            for (WaringCycle w : list) {
+                Map maps = Maps.newHashMap();
+                for (String pro : property) {
+                        maps.put(pro, Reflections.invokeGetter(w, pro));
+
+                }
+                data.add(maps);
+            }
+            List nodeInfo = new ArrayList();
+            String[] property1 = new String[]{"id", "nodeNum"};
+            Map mapNode = Maps.newHashMap();
+            for (String pro1 : property1) {
+                mapNode.put(pro1, Reflections.invokeGetter(node, pro1));
+            }
+            nodeInfo.add(mapNode);
+            List nodeCollectiontype=new ArrayList();
+            Map nodeColMap=Maps.newHashMap();
+            String[] property2=new String[]{"id","nodeId","cycleTime","cycleOff","cycleOn","addTime","updateTime"};
+            for(String pro2:property2){
+                if(pro2=="addTime"){
+                    nodeColMap.put(pro2,sdf.format(nodeCollectionCycle.getAddTime()));
+                }else if(pro2=="updateTime"){
+                    nodeColMap.put(pro2,sdf.format(nodeCollectionCycle.getUpdateTime()));
+                }else {
+                    nodeColMap.put(pro2, Reflections.invokeGetter(nodeCollectionCycle, pro2));
+                }
+            }
+            nodeCollectiontype.add(nodeColMap);
+           /* //这三行代码会报异常
+            nodeCollectionCycle.setCycleTime(QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleTime()));
+            nodeCollectionCycle.setCycleOn(QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleOn()));
+            nodeCollectionCycle.setCycleOff(QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleOff()));*/
+            result.put("flag","1");
+            result.put("nodeInfo",nodeInfo);
+            result.put("cycleList",data);
+            result.put("nodeCycle",nodeCollectiontype);
+        }
+    }catch (Exception e){
+        result.put("flag","0");
+        result.put("msg","没有这个节点对应的开关策略");
+    }
+        return result;
+}
+    /**
+     * 开关控制
+     *
+     * @param nodeMac
+     * @param status
+     * @return
+     */
+    @RequestMapping("HandOpenClose")
+    @ResponseBody
+    public Map HandOpenClose(String nodeMac, String status) {
+        Map result = Maps.newHashMap();
+        NodeControlUtil nodeControlUtil = new NodeControlUtil();
+        String nodeNum=nodeMac;
+        Node node = nodeService.findByNodeNum(nodeNum);
+        node.setUpdateTime(new Date());
+
+        try {
+            if (status.equals("1")) {
+                //执行关闭命令
+                nodeControlUtil.closeNode(node);
+                node.setOpenFlag("0");
+                result.put("msg", "成功关闭");
+                result.put("flag", "1");
+            }
+            if (status.equals("0")) {
+                nodeControlUtil.openNode(node);
+                node.setOpenFlag("1");
+                result.put("msg", "成功打开");
+                result.put("flag", "1");
+            }
+            nodeService.save(node);
+        } catch (Exception e) {
+            result.put("flag", "0");
+            result.put("msg","设备掉线，或未连接！");
+        }
+        return result;
+    }
+
+    /**
+     * 智能控制列表
+     */
+    @RequestMapping("cycleList")
+    @ResponseBody
+    public Map cycleList(String nodeNum){
+        Map result=Maps.newHashMap();
+        try {
+            WaringCycle waringCycle=new WaringCycle();
+            waringCycle.setNodeNum(nodeNum);
+            List<WaringCycle> list = waringCycleService.findList(waringCycle);
+            String[] property = new String[]{"id", "nodeNum", "property", "max", "min", "cycle"};
+            List lists = new ArrayList();
+            for (WaringCycle w : list) {
+                Map maps = Maps.newHashMap();
+                for (String pro : property) {
+                    maps.put(pro, Reflections.invokeGetter(w, pro));
+                }
+                lists.add(maps);
+            }
+            result.put("flag", "1");
+            result.put("info", lists);
+        }catch (Exception e){
+            result.put("flag","0");
+            result.put("msg","操作失败");
+        }
+        return result;
+
+
+    }
+
+
+    /**
+     *
+     * 详情数据表
+     */
+    @RequestMapping("getByDay")
+    @ResponseBody
+    public Map getNodeDtailsList(String nodeNum,String type,String data){
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH");
+        SimpleDateFormat sdf1=new SimpleDateFormat("yyyy-MM-dd");
+        Map result=new HashMap();
+        String param = null;
+        try {
+            Map map = new HashMap();
+            map.put("nodeMac", "'"+nodeNum+"'");
+            switch (type){
+                case "airTemperature":
+                    param="air_temperature";
+                    break;
+                case "airHumidity":
+                    param="air_humidity";
+                    break;
+                case "soilTemperature1":
+                    param="soil_temperature1";
+                    break;
+                case "soilHumidity1":
+                    param="soil_humidity1";
+                    break;
+                case "soilTemperature2":
+                    param="soil_temperature2";
+                    break;
+                case "soilHumidity2":
+                    param="soil_humidity2";
+                    break;
+                case "soilTemperature3":
+                    param="soil_temperature3";
+                    break;
+                case "soilHumidity3":
+                    param="soil_humidity3";
+                    break;
+                case "co2":
+                    param="co2";
+                    break;
+            }
+            map.put("param", param);
+            if(data==null||data.equals("")){
+                data=sdf1.format(new Date());
+            }
+            map.put("addTime", "'"+data+"'");
+            List<NodeDataDetails> lists = nodeDataDetailsService.findByDay(map);
+            List info = new ArrayList();
+            NodeDataDetails dataDetails=null;
+            if (lists != null && lists.size() > 0) {
+                String[] proper = new String[]{"content","addTime"};
+                Map maps = Maps.newHashMap();
+                String [] addTimes=new String[lists.size()];
+                String[] valuePare=new String[lists.size()];
+                for (String property : proper) {
+                    for (int i=0;i<lists.size();i++) {
+                        dataDetails =lists.get(i);
+                        if (property == "addTime") {
+                            addTimes[i]= sdf.format(dataDetails.getAddTime());
+                        }else{
+                            valuePare[i]=String.valueOf(Reflections.invokeGetter(dataDetails,property));
+                        }
+                    }
+                    if (property == "addTime") {
+                        maps.put(property, addTimes);
+                    }else{
+                        maps.put(property, valuePare);
+                    }
+
+                }
+                info.add(maps);
+                result.put("info", info);
+            }else{
+                result.put("msg", "暂无数据");
+            }
+            result.put("flag", 1);
+
+        }catch (Exception e){
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+        }
+        return result;
+    }
+
+    /**
+     * 周期控制进入页面
+     */
+    @RequestMapping("getcycleMsg")
+    @ResponseBody
+    public Map getCycle(String nodeNum){
+        SimpleDateFormat sdf=new SimpleDateFormat("HH:mm:ss");
+        Map result = Maps.newHashMap();
+        List lists=new ArrayList();
+        try{
+         NodeCollectionCycle nCC=new NodeCollectionCycle();
+         nCC.setNodeId(nodeNum);
+            NodeCollectionCycle nodeCollectionCycle = nodeCollectionCycleService.findByNodeId(nCC);
+            if (nodeCollectionCycle != null) {
+                String[] property = new String[]{"id", "nodeId", "cycleTime", "cycleOff", "cycleOn", "addTime","updateTime"};
+                Map maps=Maps.newHashMap();
+                for(String pro:property){
+                    if(pro.equals("addTime")){
+                        maps.put(pro, sdf.format(nodeCollectionCycle.getAddTime()));
+                    }else if (pro.equals("updateTime")){
+                        maps.put(pro, sdf.format(nodeCollectionCycle.getUpdateTime()));
+                    }else  if(pro.equals("cycleTime")){
+                       String cycTime=QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleTime());
+                        maps.put(pro,cycTime);
+                    }else if(pro.equals("cycleOff")){//关闭策略
+                        String cycleOff=QutarzUtil.qutarzStrConvertDate(nodeCollectionCycle.getCycleOff());
+                        maps.put(pro,cycleOff);
+                    }else if (pro.equals("cycleOn")){//开启策略
+                        String cycleOn=QutarzUtil.qutarzStrConvertDate(nodeCollectionCycle.getCycleOn());
+                        maps.put(pro,cycleOn);
+                    }else {
+                        maps.put(pro, Reflections.invokeGetter(nodeCollectionCycle, pro));
+                    }
+                                        }
+                lists.add(maps);
+                result.put("flag", 1);
+                result.put("info", lists);
+            }else {
+                result.put("flag",0);
+                result.put("msg","没有这个节点对应的周期策略");
+            }
+
+        }catch (Exception e){
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+        }
+        return result;
+    }
+    /**
+     * 周期控制
+     *
+     * @return
+     */
+    @RequestMapping("cycleMsg")
+    @ResponseBody
+    public Map cycle(NodeCollectionCycle nodeCollectionCycle,String nodeNum, String[] off, String[] on) {
+        Map result = Maps.newHashMap();
+        try {
+            Node node=nodeService.findByNodeNum(nodeNum);
+            nodeCollectionCycle.setNodeId(node.getId());
+            nodeCollectionCycleService.deleteByNodeId(nodeCollectionCycle);
+            nodeCollectionCycle.setAddUserId(Long.parseLong(UserUtils.getUser().getId()));
+            nodeCollectionCycle.setCycleTime(0 + " " + nodeCollectionCycle.getCycleTime() + " * * * ?");
+            nodeCollectionCycle.setCycleOn(QutarzUtil.dateConvertQutarzFormate(nodeCollectionCycle.getCycleOn()));
+            nodeCollectionCycle.setCycleOff(QutarzUtil.dateConvertQutarzFormate(nodeCollectionCycle.getCycleOff(), off));
+            nodeCollectionCycleService.save(nodeCollectionCycle);
+            //启动定时器
+            QutarzUtil.start();
+            result.put("flag", 1);
+            result.put("msg", "设置成功");
+        } catch (Exception e) {
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+        }
+        return result;
+    }
+
+    /**
+     * 智能控制
+     *
+     * @return
+     */
+    @RequestMapping("autoMsg")
+    @ResponseBody
+    public Map autoNode(WaringCycle waringCycle) {
+        Map result = Maps.newHashMap();
+        try {
+            waringCycleService.save(waringCycle);
+            result.put("flag", 1);
+            result.put("msg", "操作成功");
+        } catch (Exception e) {
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+            e.printStackTrace();
+        }
+        return result;
+    }
+    @RequestMapping("updateAutoMsg")
+    @ResponseBody
+    public Map autoMsg(String id){
+        Map result=Maps.newHashMap();
+        try {
+            WaringCycle waringCycle = waringCycleService.get(id);
+            String[] property = new String[]{"id", "nodeNum", "property", "max", "min", "cycle"};
+            List lists = new ArrayList();
+            Map maps = Maps.newHashMap();
+            for (String pro : property) {
+                maps.put(pro, Reflections.invokeGetter(waringCycle, pro));
+            }
+            lists.add(maps);
+            result.put("flag", 1);
+            result.put("info",lists);
+        } catch (Exception e) {
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+        e.printStackTrace();
+    }
+            return  result;
+    }
+}
