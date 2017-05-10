@@ -54,7 +54,7 @@ public class ARelayController {
             if (user != null) {
                 boolean AdminUser = User.isAdmin(userId);
                 if (!AdminUser) {
-                    List<Role> rolse = UserUtils.getRoleList();
+                    List<Role> rolse = user.getRoleList();
                     for (Role ro : rolse) {
                         if (ro.getEnname().equals("farmerBoss")) {
                             relay.setUser(user);

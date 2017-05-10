@@ -209,25 +209,15 @@ RelayController extends BaseController {
 
     @RequestMapping(value = "online")
     public String online(Model model) {
-        Map<String, IoSessionEntity> maps = MinaLongConnServer.sessionMap;
-        List<String> mapKeyList = new ArrayList<>(maps.keySet());
-
-        List<IoSessionEntity> list = new ArrayList<>();
-        for (String str: mapKeyList ) {
-            list.add(maps.get(str));
+        try {
+            Map<String, IoSessionEntity> maps = MinaLongConnServer.sessionMap;
+            Integer total = relayService.getRelayNum();
+            model.addAttribute("total", total);
+            model.addAttribute("online", maps.size());
+            model.addAttribute("offline", total - maps.size());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-//        Map map = new HashMap();
-//        map.put("msg","what a fu");
-//        for(;;){
-//            try {
-//                PushMsgToSingleDevice.push(map.toString(),UserUtils.getUser().getChannelId());
-//            } catch (PushClientException e) {
-//                e.printStackTrace();
-//            } catch (PushServerException e) {
-//                e.printStackTrace();
-//            }
-//        }
-        model.addAttribute("list",list);
         return "manager/relay/onlineList";
     }
 }

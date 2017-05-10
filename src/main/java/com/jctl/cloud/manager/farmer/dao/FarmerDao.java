@@ -14,5 +14,5 @@ import com.jctl.cloud.manager.farmer.entity.Farmer;
  */
 @MyBatisDao
 public interface FarmerDao extends CrudDao<Farmer> {
-	
+
 }

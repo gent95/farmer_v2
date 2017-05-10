@@ -224,7 +224,12 @@
 			#{updateTime}
 		)
 	</insert>
-
+    <select id="getRelayNum" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM jc_relay a
+        WHERE a.del_flag = 1
+    </select>
     <update id="update">
 		UPDATE jc_relay SET
 			relay_num = #{relayNum},

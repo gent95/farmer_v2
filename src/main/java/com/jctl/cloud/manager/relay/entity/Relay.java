@@ -135,7 +135,7 @@ public class Relay extends DataEntity<Relay> {
 	public void setLog(String log) {
 		this.log = log;
 	}
-	
+
 	public String getLat() {
 		return lat;
 	}

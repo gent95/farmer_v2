@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <template>
-	<name>controller</name>
-	<filePath>src/main/java/${packageName}/${moduleName}/web/${subModuleName}</filePath>
-	<fileName>${ClassName}Controller.java</fileName>
-	<content><![CDATA[
+    <name>controller</name>
+    <filePath>src/main/java/${packageName}/${moduleName}/web/${subModuleName}</filePath>
+    <fileName>${ClassName}Controller.java</fileName>
+    <content><![CDATA[
 /**
  * Copyright &copy; 2012-2016 <a href="https://github.com/thinkgem/jeesite">JeeSite</a> All rights reserved.
  */
@@ -55,37 +55,55 @@ public class ${ClassName}Controller extends BaseController {
 	@RequiresPermissions("${permissionPrefix}:view")
 	@RequestMapping(value = {"list", ""})
 	public String list(${ClassName} ${className}, HttpServletRequest request, HttpServletResponse response, Model model) {
-		Page<${ClassName}> page = ${className}Service.findPage(new Page<${ClassName}>(request, response), ${className}); 
-		model.addAttribute("page", page);
+		try{
+			Page<${ClassName}> page = ${className}Service.findPage(new Page<${ClassName}>(request, response), ${className});
+			model.addAttribute("page", page);
+		}catch(Exception e){
+		 	e.printStackTrace();
+		}
 		return "${lastPackageName}/${viewPrefix}List";
 	}
 
 	@RequiresPermissions("${permissionPrefix}:view")
 	@RequestMapping(value = "form")
 	public String form(${ClassName} ${className}, Model model) {
-		model.addAttribute("${className}", ${className});
+		try{
+			model.addAttribute("${className}", ${className});
+		}catch(Exception e){
+		 	e.printStackTrace();
+		}
 		return "${lastPackageName}/${viewPrefix}Form";
 	}
 
 	@RequiresPermissions("${permissionPrefix}:edit")
 	@RequestMapping(value = "save")
 	public String save(${ClassName} ${className}, Model model, RedirectAttributes redirectAttributes) {
-		if (!beanValidator(model, ${className})){
-			return form(${className}, model);
-		}
-		${className}Service.save(${className});
-		addMessage(redirectAttributes, "保存${functionNameSimple}成功");
+        try{
+            if (!beanValidator(model, ${className})){
+                    return form(${className}, model);
+                }
+                ${className}Service.save(${className});
+                addMessage(redirectAttributes, "保存${functionNameSimple}成功");
+            }catch(Exception e){
+                addMessage(redirectAttributes, "保存${functionNameSimple}失败");
+                e.printStackTrace();
+            }
 		return "redirect:"+Global.getAdminPath()+"/${viewPrefix}/?repage";
 	}
 	
 	@RequiresPermissions("${permissionPrefix}:edit")
 	@RequestMapping(value = "delete")
 	public String delete(${ClassName} ${className}, RedirectAttributes redirectAttributes) {
-		${className}Service.delete(${className});
-		addMessage(redirectAttributes, "删除${functionNameSimple}成功");
+	    try{
+            ${className}Service.delete(${className});
+            addMessage(redirectAttributes, "删除${functionNameSimple}成功");
+		}catch(Exception e){
+		    addMessage(redirectAttributes, "删除${functionNameSimple}失败");
+		 	e.printStackTrace();
+		}
 		return "redirect:"+Global.getAdminPath()+"/${viewPrefix}/?repage";
 	}
 
 }]]>
-	</content>
+    </content>
 </template>

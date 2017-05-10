@@ -17,6 +17,7 @@ import com.jctl.cloud.manager.waring.entity.WaringCycle;
 import com.jctl.cloud.manager.waring.service.WaringCycleService;
 import com.jctl.cloud.modules.sys.entity.Role;
 import com.jctl.cloud.modules.sys.entity.User;
+import com.jctl.cloud.modules.sys.service.SystemService;
 import com.jctl.cloud.modules.sys.utils.UserUtils;
 import com.jctl.cloud.utils.NodeControlUtil;
 import com.jctl.cloud.utils.QutarzUtil;
@@ -47,6 +48,8 @@ public class ANodeController {
     private FarmlandService farmlandService;
     @Autowired
     private RelayService relayService;
+    @Autowired
+    private SystemService systemService;
 
     /**
      * 节点详情列表
@@ -61,25 +64,10 @@ public class ANodeController {
         List lists = new ArrayList<>();
 
         NodeDataDetails nodeDataDetails=new NodeDataDetails();
-        List<NodeDataDetails> nodeDataDetailsLists=new ArrayList<NodeDataDetails>();
+
         SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
-            Node node=new Node();
-            node.setFarmlandId(farmlandId);
-            node.setDelFlag("1");
-            List<Node> nodeList=nodeService.findList(node);
-                if(nodeList!=null||nodeList.size()>0) {
-                    for (Node no : nodeList) {
-                    nodeDataDetails.setNodeMac(no.getNodeNum());
-                    List<NodeDataDetails>  nodeDataDetailsListTest = nodeDataDetailsService.findList(nodeDataDetails);
-                    if(nodeDataDetailsListTest != null || nodeDataDetailsListTest.size() > 0){
-                        for(NodeDataDetails da:nodeDataDetailsListTest){
-                            da.setNodeName(no.getNodeAlise());
-                            nodeDataDetailsLists.add(da);
-                        }
-                    }
-                    }
-            }
+            List<NodeDataDetails> nodeDataDetailsLists=nodeDataDetailsService.findNodeDetailByFarmlandId(farmlandId);
             if (nodeDataDetailsLists != null || nodeDataDetailsLists.size() > 0) {
                 for (NodeDataDetails dataDetails : nodeDataDetailsLists) {
                     String[] proper = new String[]{"id","nodeMac", "airTemperature", "airHumidity", "soilTemperature1","soilHumidity1","soilTemperature2","soilHumidity2","soilTemperature3","soilHumidity3","co2", "openFlag", "power", "addTime","nodeName"};
@@ -117,30 +105,36 @@ public class ANodeController {
         List lists = new ArrayList();
         try {
             List<Node> nodeList = nodeService.findList(node);
-            boolean isAdmin = User.isAdmin(userId);
-            if (!isAdmin) {
-                List<Role> list = UserUtils.getRoleList();
-                for (Role role : list) {
-                    if (role.getEnname().equals("farmerBoss")) {
-                        node.setUser(UserUtils.get(userId));
-                    }
-                    if (role.getEnname().equals("farmerWork")) {
-                        node.setUsedId(userId);
+            User user=systemService.getUser(userId);
+            if(user!=null) {
+                boolean isAdmin = User.isAdmin(userId);
+                if (!isAdmin) {
+                    List<Role> list = user.getRoleList();
+                    for (Role role : list) {
+                        if (role.getEnname().equals("farmerBoss")) {
+                            node.setUser(user);
+                        }
+                        if (role.getEnname().equals("farmerWork")) {
+                            node.setUsedId(userId);
+                        }
                     }
                 }
-            }
-            if (nodeList != null || nodeList.size() > 0) {
-                String[] proper = new String[]{"id", "nodeNum", "farmlandName", "usedName", "power","nodeAlise","onOffName"};
-                for (Node no : nodeList) {
-                    Map maps = Maps.newHashMap();
-                    for (String property : proper) {
-                        maps.put(property, Reflections.invokeGetter(no, property));
+                if (nodeList != null || nodeList.size() > 0) {
+                    String[] proper = new String[]{"id", "nodeNum", "farmlandName", "usedName", "power", "nodeAlise", "onOffName"};
+                    for (Node no : nodeList) {
+                        Map maps = Maps.newHashMap();
+                        for (String property : proper) {
+                            maps.put(property, Reflections.invokeGetter(no, property));
+                        }
+                        lists.add(maps);
                     }
-                    lists.add(maps);
+                    result.put("flag", 1);
+                    result.put("info", lists);
+                } else {
+                    result.put("flag", 0);
+                    result.put("msg", "抱歉未查询到数据");
                 }
-                result.put("flag", 1);
-                result.put("info", lists);
-            } else {
+            }else {
                 result.put("flag", 0);
                 result.put("msg", "抱歉未查询到数据");
             }
@@ -163,18 +157,29 @@ public class ANodeController {
             List farmList=new ArrayList();
             Farmland farmland=new Farmland();
             Node no = nodeService.get(id);
-            String[] proper = new String[]{"id", "nodeNum", "type", "user.name", "usedName", "relayName", "cycle", "addTime", "farmlandName", "power","nodeAlise","onOffName"};
+            String[] proper = new String[]{"id", "nodeNum", "type", "", "usedName", "relayName", "cycle", "addTime", "farmlandName", "power","nodeAlise","onOffName"};
+            if(no.getUser()!=null){
+                proper[3]="user";
+            }
             Map info = Maps.newHashMap();
             for (String property : proper) {
                 if (property.equals("relayName")) {
                     info.put("relayNum", Reflections.invokeGetter(no, property));
-                    if(property.equals("addTime")){
-                        info.put(property, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(no.getAddTime()));
+                    if(property.equals("addTime")) {
+                        if (no.getAddTime() != null) {
+                            info.put(property, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(no.getAddTime()));
+                        }else {
+                            info.put(property,"");
+                        }
                     }
                 }else {
                     info.put(property, Reflections.invokeGetter(no, property));
                     if(property.equals("addTime")){
-                        info.put(property, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(no.getAddTime()));
+                        if (no.getAddTime() != null) {
+                            info.put(property, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(no.getAddTime()));
+                        }else {
+                            info.put(property,"");
+                        }
                     }
 
                 }
@@ -189,30 +194,36 @@ public class ANodeController {
             for (NodeDataDetails nodeDataDetail : dataDetails) {
                 for (String property : property1) {
                     if(property.equals("addTime")){
-                        data.put(property, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(nodeDataDetail.getAddTime()));
-                    }else {
+                        if(nodeDataDetail.getAddTime()!=null) {
+                            data.put(property, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(nodeDataDetail.getAddTime()));
+                        }else {
+                            data.put(property,"");
+                        }
+                        }else {
                         data.put(property, Reflections.invokeGetter(nodeDataDetail, property));
                     }
                 }
                 break;
             }
             if(no.getRelayName()!=null) {
-               Relay relay= relayService.getByMac(no.getRelayName());
-                if(relay.getFarmer()!=null&&relay.getFarmer().getId()!=null&&!relay.getFarmer().getId().equals("")){
-                    farmland.setFarmer(relay.getFarmer());
-                    farmland.setDelFlag("1");
-                }
-                List<Farmland> farmlandList=farmlandService.findList(farmland);
-                String[] pro = new String[]{"id", "alias","usedName","usedId"};
-                for(Farmland fa:farmlandList){
-                    Map message=Maps.newHashMap();
-                    for(String p:pro) {
-                        message.put(p, Reflections.invokeGetter(fa, p));
+                Relay relay = relayService.getByMac(no.getRelayName());
+                if (relay != null) {
+                    if (relay.getFarmer() != null) {
+                        farmland.setFarmer(relay.getFarmer());
+                        farmland.setDelFlag("1");
+                        List<Farmland> farmlandList = farmlandService.findList(farmland);
+                        String[] pro = new String[]{"id", "alias", "usedName", "usedId"};
+                        for (Farmland fa : farmlandList) {
+                            Map message = Maps.newHashMap();
+                            for (String p : pro) {
+                                message.put(p, Reflections.invokeGetter(fa, p));
+                            }
+                            farmList.add(message);
+                        }
                     }
-                    farmList.add(message);
                 }
             }
-             result.put("flag", 1);
+            result.put("flag", 1);
             result.put("data", data);
             result.put("info", info);
             result.put("farmList", farmList);
@@ -312,6 +323,7 @@ public Map strategyManagerment(String nodeId){
     }
         return result;
 }
+
     /**
      * 开关控制
      *

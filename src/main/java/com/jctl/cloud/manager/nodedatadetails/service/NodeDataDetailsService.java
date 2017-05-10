@@ -83,4 +83,7 @@ public class NodeDataDetailsService extends CrudService<NodeDataDetailsDao, Node
     public NodeDataDetails getLastByNodeNum(String nodeNum) {
       return   nodeDataDetailsDao.getLastByNodeNum(nodeNum);
     }
+    public List<NodeDataDetails> findNodeDetailByFarmlandId(String farmlandId){
+       return nodeDataDetailsDao.findNodeDetailByFarmlandId(farmlandId);
+    }
 }

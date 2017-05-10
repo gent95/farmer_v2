@@ -110,6 +110,36 @@
         ORDER BY a.add_time DESC
         LIMIT 0,1
     </select>
+    <select id="findNodeDetailByFarmlandId" resultType="NodeDataDetails">
+    SELECT
+		a.id AS "id",
+		a.node_mac AS "nodeMac",
+		a.node_type_id AS "nodeTypeId",
+		a.air_temperature AS "airTemperature",
+		a.air_humidity AS "airHumidity",
+		a.soil_temperature1 AS "soilTemperature1",
+		a.soil_humidity1 AS "soilHumidity1",
+		a.soil_temperature2 AS "soilTemperature2",
+		a.soil_humidity2 AS "soilHumidity2",
+		a.soil_temperature3 AS "soilTemperature3",
+		a.soil_humidity3 AS "soilHumidity3",
+		a.co2 AS "co2",
+		a.open_flag AS "openFlag",
+		a.power AS "power",
+		a.frequency_point AS "frequencyPoint",
+		a.power_supply AS "powerSupply",
+		a.add_time AS "addTime",
+		a.add_user_id AS "addUserId",
+		a.update_time AS "updateTime",
+		a.update_user_id AS "updateUserId",
+		n.node_alise AS "nodeName"
+        FROM jc_node_data_details a
+       INNER JOIN jc_node n ON a.node_Mac=n.node_num
+       where a.node_Mac in
+       (select n.node_num from jc_node n
+       RIGHT JOIN jc_farmland f ON n.farmland_id=f.id
+        where f.id=#{farmlandId})
+    </select>
 
     <select id="fetchLastData" resultType="NodeDataDetails">
         SELECT * FROM

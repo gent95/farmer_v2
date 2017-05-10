@@ -21,38 +21,38 @@
 		u.name AS "usedName",
 		a.addr AS "addr"
 	</sql>
-	
+
 	<sql id="farmerJoins">
 		LEFT JOIN sys_user u6 ON u6.id = a.user_id
 		LEFT JOIN sys_user u ON u.id = a.used_id
 	</sql>
-    
+
 	<select id="get" resultType="Farmer">
-		SELECT 
-			<include refid="farmerColumns"/>
+		SELECT
+		<include refid="farmerColumns"/>
 		FROM jc_farmer a
 		<include refid="farmerJoins"/>
 		WHERE a.id = #{id}
 	</select>
-	
+
 	<select id="findList" resultType="Farmer">
-		SELECT 
-			<include refid="farmerColumns"/>
+		SELECT
+		<include refid="farmerColumns"/>
 		FROM jc_farmer a
 		<include refid="farmerJoins"/>
 		<where>
 			a.del_flag = 1
 			<if test="farmerNum != null and farmerNum != ''">
-				AND a.farmer_num LIKE 
-					<if test="dbName == 'oracle'">'%'||#{farmerNum}||'%'</if>
-					<if test="dbName == 'mssql'">'%'+#{farmerNum}+'%'</if>
-					<if test="dbName == 'mysql'">concat('%',#{farmerNum},'%')</if>
+				AND a.farmer_num LIKE
+				<if test="dbName == 'oracle'">'%'||#{farmerNum}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{farmerNum}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{farmerNum},'%')</if>
 			</if>
 			<if test="name != null and name != ''">
 				AND a.name LIKE
-					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
-					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
-					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+				<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
 			</if>
 			<if test="user != null and user.id != null and user.id != ''">
 				AND a.user_id = #{user.id}
@@ -69,16 +69,16 @@
 			</otherwise>
 		</choose>
 	</select>
-	
+
 	<select id="findAllList" resultType="Farmer">
-		SELECT 
-			<include refid="farmerColumns"/>
+		SELECT
+		<include refid="farmerColumns"/>
 		FROM jc_farmer a
 		<include refid="farmerJoins"/>
 		<where>
 			a.del_flag = 1
 			and a.use_flag=1
-		</where>		
+		</where>
 		<choose>
 			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
 				ORDER BY ${page.orderBy}
@@ -87,61 +87,59 @@
 			</otherwise>
 		</choose>
 	</select>
-	
+
 	<insert id="insert">
 		INSERT INTO jc_farmer(
-			farmer_num,
-			name,
-			area,
-			plant_variety,
-			user_id,
-			remarks,
-			add_time,
-			add_user_id,
-			update_time,
-			update_user_id,
-			used_id,
-			addr
+		farmer_num,
+		name,
+		area,
+		plant_variety,
+		user_id,
+		remarks,
+		add_time,
+		add_user_id,
+		update_time,
+		update_user_id,
+		used_id,
+		addr
 		) VALUES (
-			#{farmerNum},
-			#{name},
-			#{area},
-			#{plantVariety},
-			#{user.id},
-			#{remarks},
-			#{addTime},
-			#{addUserId},
-			#{updateTime},
-			#{updateUserId},
-			#{usedId},
-			#{addr}
+		#{farmerNum},
+		#{name},
+		#{area},
+		#{plantVariety},
+		#{user.id},
+		#{remarks},
+		#{addTime},
+		#{addUserId},
+		#{updateTime},
+		#{updateUserId},
+		#{usedId},
+		#{addr}
 		)
 	</insert>
-	
+
 	<update id="update">
-		UPDATE jc_farmer SET 	
-			farmer_num = #{farmerNum},
-			name = #{name},
-			area = #{area},
-			plant_variety = #{plantVariety},
-			user_id = #{user.id},
-			used_id=#{usedId},
-			order_num = #{orderNum},
-			use_flag = #{useFlag},
-			del_flag = #{delFlag},
-			add_time = #{addTime},
-			add_user_id = #{addUserId},
-			update_time = #{updateTime},
-			addr=#{addr},
-			remarks=#{remarks},
-			update_user_id = #{updateUserId}
+		UPDATE jc_farmer SET
+		farmer_num = #{farmerNum},
+		name = #{name},
+		area = #{area},
+		plant_variety = #{plantVariety},
+		user_id = #{user.id},
+		used_id=#{usedId},
+		order_num = #{orderNum},
+		use_flag = #{useFlag},
+		add_time = #{addTime},
+		add_user_id = #{addUserId},
+		update_time = #{updateTime},
+		addr=#{addr},
+		remarks=#{remarks},
+		update_user_id = #{updateUserId}
 		WHERE id = #{id}
 	</update>
-	
+
 	<update id="delete">
-		UPDATE jc_farmer SET 
-			del_flag = #{delFlag}
+		DELETE FROM jc_farmer
 		WHERE id = #{id}
 	</update>
-	
+
 </mapper>

@@ -43,5 +43,5 @@ public class FarmerService extends CrudService<FarmerDao, Farmer> {
 	public void delete(Farmer farmer) {
 		super.delete(farmer);
 	}
-	
+
 }

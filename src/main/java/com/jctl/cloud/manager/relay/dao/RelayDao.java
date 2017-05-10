@@ -30,4 +30,6 @@ public interface RelayDao extends CrudDao<Relay> {
     List<Relay> findListByUser(Relay relay);
 
     List<Relay> getTest();
+
+    Integer getRelayNum();
 }

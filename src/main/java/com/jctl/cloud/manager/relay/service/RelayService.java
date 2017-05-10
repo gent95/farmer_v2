@@ -407,4 +407,8 @@ public class RelayService extends CrudService<RelayDao, Relay> {
     public List<Relay> getTest() {
         return relayDao.getTest();
     }
+
+    public Integer getRelayNum() {
+        return relayDao.getRelayNum();
+    }
 }

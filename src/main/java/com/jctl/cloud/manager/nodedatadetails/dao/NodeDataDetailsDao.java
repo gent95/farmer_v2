@@ -25,4 +25,5 @@ public interface NodeDataDetailsDao extends CrudDao<NodeDataDetails> {
     List<NodeDataDetails> findByMonth(Map map);
 
     NodeDataDetails getLastByNodeNum(String nodeNum);
+    List<NodeDataDetails> findNodeDetailByFarmlandId(String farmlandId);
 }

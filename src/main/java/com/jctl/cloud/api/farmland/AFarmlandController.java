@@ -126,27 +126,42 @@ public class AFarmlandController {
 
     @RequestMapping("get")
     @ResponseBody
-    public Map getFarmland(String id) {
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    public Map getFarmland(String id,String userId) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Map result = Maps.newHashMap();
         try {
             Farmland farmland = farmlandService.get(id);
-            String[] propert = new String[]{"relay","id", "alias", "plantVaritety", "nodeNumber","usedId","usedName","assigneTime","area","addr","nodeNumber","farmlandNum","landType","user","remarks"};
+            String[] propert = new String[]{"id", "alias", "plantVaritety", "nodeNumber", "usedId", "usedName", "assigneTime", "area", "addr", "nodeNumber", "farmlandNum", "landType", "remarks","",""};
+
+            if(farmland.getUser()!=null&&farmland.getUser().getId()!=null&&farmland.getUser().getId()!=""){
+                propert[13]="user";
+            }
+            if(farmland.getRelay()!=null&&farmland.getRelay().getId()!=null&&farmland.getRelay().getId()!=""){
+                propert[14]="relay";
+            }
             List messages = new ArrayList();
             Map message = Maps.newHashMap();
+            List lisq=new ArrayList();
             for (String pro : propert) {
-             if (pro == "assigneTime") {
-                 if(farmland.getAssigneTime()==null||farmland.getAssigneTime().equals("")){
-                     message.put("assigneTime",null);
-                 }else {
-                     message.put("assigneTime", sdf.format(farmland.getAssigneTime()));
+                if (pro == "assigneTime") {
+                    if (farmland.getAssigneTime() == null || farmland.getAssigneTime().equals("")) {
+                        message.put("assigneTime", null);
+                    } else {
+                        message.put("assigneTime", sdf.format(farmland.getAssigneTime()));
+                    }
+                } else  if(pro=="area"){
+                    if(farmland.getArea()==null){
+                        message.put("area","0.00");
+                    }else{
+                        message.put("area",farmland.getArea());
+                    }
+                }else{
+                message.put(pro, Reflections.invokeGetter(farmland, pro));
                  }
-                 }else {
-                    message.put(pro, Reflections.invokeGetter(farmland, pro));
-                }
-            }
+    }
             Farmer farmer=new Farmer();
-            farmer.setUser(farmland.getUser());
+            User user=systemService.getUser(userId);
+            farmer.setUser(user);
             List<Farmer> farmers=farmerService.findList(farmer);
             List data=new ArrayList();
             String[] property1=new String[]{"id","name"};
@@ -158,7 +173,7 @@ public class AFarmlandController {
                 data.add(dataMap);
             }
             List userList=new ArrayList();
-            List<User> listUser=systemService.findUserByComplayIdAndUserId(farmland.getUser());
+            List<User> listUser=systemService.findUserByComplayIdAndUserId(user);
             String[] property2=new String[]{"id","name"};
             if(listUser!=null&&listUser.size()>0) {
                 for (User of : listUser) {
