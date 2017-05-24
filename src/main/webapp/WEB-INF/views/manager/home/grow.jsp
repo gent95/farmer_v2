@@ -1,0 +1,196 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ include file="/WEB-INF/views/include/taglib.jsp" %>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="decorator" content="default"/>
+    <title>农业种植首页</title>
+    <%--<script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.js"></script>--%>
+    <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+    <script src="http://api.map.baidu.com/api?v=1.4" type="text/javascript"></script>
+    <script src="${ctxStatic}/js/grow.js"></script>
+    <%--<script>
+        var c=document.getElementById("farmerName").firstChild
+    </script>--%>
+    <style type="text/css">
+        body {
+            background-image: url('${ctxStatic}/images/homePage/tu-1.png');
+            height: auto;
+        }
+
+        * {
+            margin: 0 auto;
+            padding: 0px;
+            /*overflow-x: hidden;*/
+            /*color: white;*/
+            border: none;
+        }
+.BMap_bubble_content{
+    color: #000000;
+}
+        #box {
+            margin: 10px 20px;
+            height: auto;
+            width:auto;
+        }
+
+        .myChart {
+            height: 240px;
+            width: 440px;
+            background-color: #FFFFFF;
+            background-color: rgba(181, 219, 255, 0.30);
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            margin-left: 10px;
+        }
+
+        .topHead {
+            color: yellow;
+            font-size: 18px;
+            width:440px;
+            height: 28px;
+            margin-top: 10px;
+            margin-left: 10px;
+            background-color: #FFFFFF;
+            background-color: rgba(181, 219, 255, 0.60);
+            text-align: center;
+            line-height: 28px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        #logo{
+            width:440px;
+            height: 60px;
+            background-color: #FFFFFF;
+            background-color: rgba(181, 219, 255, 0.30);
+            border-radius: 15px;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        option{
+            height:60px;
+            padding-left: 40%;
+        }
+        select{
+            text-align: center;
+        }
+    </style>
+
+</head>
+
+<body>
+<div id="box">
+    <table>
+        <tr>
+            <td ><div id="logo"><a href="${ctx}/chart/sysIndex"><img src="${ctxStatic}/images/03.png"/></a></div></td>
+            <td id="farmer" colspan="3">
+                <select id="farmerName" name="farmerName" style="width:1290px; padding-top: 15px; padding-bottom: 15px; border-color:rgba(181, 219, 255, 0.30);  background-color: rgba(181, 219, 255, 0.30); border-radius: 15px;font-size: 30px; font-weight: bold;">
+                </select>
+                <a href="${ctx}/grow/goBack" style=" padding: 15px; margin-left: 5px; font-weight: 500; border-radius: 15px;background-color: rgba(181, 219, 255, 0.30); ">返回</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="topHead">人员数量</div>
+                <div id="chart1" class="myChart"></div>
+            </td>
+            <td>
+                <div class="topHead">大气温度(℃)</div>
+                <div id="chart2" class="myChart"></div>
+            </td>
+            <td>
+                <div class="topHead">光照(LUX)</div>
+                <div id="chart3" class="myChart"></div>
+            </td>
+            <td id="farmland">
+                <div class="topHead">土地类型分布</div>
+                <div id="chart33" class="myChart"></div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="topHead">大气湿度(%RH)</div>
+                <div id="chart4" class="myChart"></div>
+            </td>
+            <td colspan="2">
+                <div class="topHead" style="width: 890px;">地图/视频</div>
+                <div id="chart5" class="myChart" style="width: 890px;">
+                    <div style="width:100%;height:100%;border:1px solid gray" id="container"></div>
+                </div>
+            </td>
+            <td>
+                <div class="topHead">气压(hpa)</div>
+                <div id="chart7" class="myChart"></div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="topHead">降雨量(mm/min)</div>
+                <div id="chart8" class="myChart"></div>
+            </td>
+            <td>
+                <div class="topHead">设备数量</div>
+                <div id="chart9" class="myChart"></div>
+            </td>
+            <td>
+                <div class="topHead">风速(m/s)</div>
+                <div id="chart10" class="myChart"></div>
+            </td>
+            <td>
+                <div class="topHead">作物分布</div>
+                <div id="chart11" class="myChart"></div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="text-align: center; padding-top:5px; color: white;">
+                Copyright&copy;大唐移动通信设备有限公司
+            </td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+    $(function(){
+        /*        $("select option:first-child").attr("selected",selected);*/
+        $("#farmland").click(function(){
+            var farmerId = $("select option:selected").val();
+            location.href="${ctx}/farmerland/farmland/farmlandDetail?id="+farmerId;
+        });
+
+        $("select").change(function(){
+            var farmerId = $("select option:selected").val();
+            getPeople("${ctx}/grow/getByFarmerlandTypeCount",farmerId);
+            getFarmers("${fns:getUser().id}");
+            getNodeAndRelayCount("${ctx}/grow/getNodeAndRelayCount",farmerId);
+            getAltis();
+            getIt("${ctx}/grow/getDatectionDates");
+        });
+
+        var farmerId = $("select option:selected").val();
+        getPeople("${ctx}/grow/getByFarmerlandTypeCount",farmerId);
+        getFarmers("${fns:getUser().id}");
+        getNodeAndRelayCount("${ctx}/grow/getNodeAndRelayCount",farmerId);
+        getAltis();
+        getIt("${ctx}/grow/getDatectionDates");
+    });
+    function  getFarmers(userId) {
+        $.ajax({
+            url:"${ctx}/grow/getFarmers",
+            type:"get",
+            dataType:"json",
+            data:{
+                userId:userId
+            },
+            success:function (result) {
+                for(var i = 0;i < result.farmers.length;i++){
+                    $("select").append("<option value="+result.farmers[i].id+">"+result.farmers[i].name + "</option>");
+                }
+            }
+        });
+    }
+</script>
+</body>
+
+</html>
