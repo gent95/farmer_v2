@@ -10,6 +10,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.jctl.cloud.manager.plant.entity.PlantVariety;
+import com.jctl.cloud.manager.plant.service.PlantVarietyService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,8 +59,10 @@ public class FarmerController extends BaseController {
     private RelayService relayService;
     @Autowired
     private  NodeService nodeService;
-@Autowired
-private SystemService systemService;
+    @Autowired
+    private SystemService systemService;
+    @Autowired
+    private PlantVarietyService plantVarietyService;
 
     @Value("#{config['farmerBoss']}")
     private String farmerBoss;
@@ -127,6 +131,10 @@ private SystemService systemService;
             model.addAttribute("page", page);
             model.addAttribute("faPage",faPage);
         }
+        PlantVariety plantVariety=new PlantVariety();
+        plantVariety.setCreateBy(UserUtils.getUser());
+        List<PlantVariety> plantVarieties=plantVarietyService.findList(plantVariety);
+        model.addAttribute("plants",plantVarieties);
         model.addAttribute("farmer", farmer);
         return "manager/farmer/farmerForm";
     }

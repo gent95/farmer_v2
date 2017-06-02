@@ -238,7 +238,7 @@
 						</tr>
 						</thead>
 						<tbody>
-						<c:forEach items="${page.list}" var="node">
+						<c:forEach items="${nodes}" var="node">
 							<tr>
 								<td><a href="${ctx}/node/node/form?id=${node.id}">
 										${node.nodeNum}

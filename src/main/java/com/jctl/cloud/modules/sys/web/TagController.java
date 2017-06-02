@@ -45,5 +45,4 @@ public class TagController extends BaseController {
 		model.addAttribute("value", request.getParameter("value"));
 		return "modules/sys/tagIconselect";
 	}
-	
 }

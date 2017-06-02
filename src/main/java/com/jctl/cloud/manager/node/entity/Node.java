@@ -3,6 +3,7 @@
  */
 package com.jctl.cloud.manager.node.entity;
 
+import com.jctl.cloud.manager.relay.entity.Relay;
 import com.jctl.cloud.modules.sys.entity.Role;
 import com.jctl.cloud.utils.FrontUserUtils;
 import org.hibernate.validator.constraints.Length;
@@ -38,7 +39,7 @@ public class Node extends DataEntity<Node> {
 	private String exceptionFlag;        // 节点固有状态(0-异常；1-正常；2-失联；默认为1)
 	private String warningFlag;        // 节点监测数据状态(0-报警；1-正常；默认为1)
 	private String controlType;        // 节点控制方式(1-手动；2-定时；3-自动；默认为1)',
-	private Long relayId;        // 所属中继(默认为-1，代表未被中继绑定)'
+	private String relayId;        // 所属中继(默认为-1，代表未被中继绑定)'
 	private String relayName; //所属中继编号
 	private String cycle;        // 数据采集周期(存储的时候单位为
 	private String addUserId;        // 添加人
@@ -53,6 +54,11 @@ public class Node extends DataEntity<Node> {
 	private String onOffName;//开光名称
 	private String task;//开光名称
 	private String status;//开光名称
+	private List<Relay> relays;//开光名称
+
+	public List<Relay> getRelays() {
+		return relays;
+	}
 
 	public String getStatus() {
 		return status;
@@ -143,7 +149,7 @@ public class Node extends DataEntity<Node> {
 	}
 
 	public Node(String nodeNum, String relayId, Date date) {
-		this.relayId = Long.valueOf(relayId);
+		this.relayId = relayId;
 		this.nodeNum = nodeNum;
 		this.addTime = date;
 	}
@@ -228,11 +234,11 @@ public class Node extends DataEntity<Node> {
 		this.controlType = controlType;
 	}
 
-	public Long getRelayId() {
+	public String getRelayId() {
 		return relayId;
 	}
 
-	public void setRelayId(Long relayId) {
+	public void setRelayId(String relayId) {
 		this.relayId = relayId;
 	}
 
@@ -299,4 +305,8 @@ public class Node extends DataEntity<Node> {
 			}
 		}
 	}
+
+    public void setRelays(List<Relay> relays) {
+        this.relays = relays;
+    }
 }

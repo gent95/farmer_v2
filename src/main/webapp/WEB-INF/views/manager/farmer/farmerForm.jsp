@@ -79,7 +79,13 @@
 		<div class="control-group">
 			<label class="control-label">种植种类：</label>
 			<div class="controls">
-				<form:input path="plantVariety" htmlEscape="false" class="input-xlarge required"/>
+		<%--		<form:input path="plantVariety" htmlEscape="false" class="input-xlarge required"/>--%>
+				<select name="plantVariety"class="input-xlarge required">
+					<option value="-1">——请选择——</option>
+					<c:forEach items="${plants}" var="plant">
+					<option value="${plant.name}" <c:if test="${farmer.plantVariety eq plant.name}">selected="selected"</c:if> >${plant.name}</option>
+					</c:forEach>
+				</select>
 			</div>
 		</div>
 		<div class="control-group">

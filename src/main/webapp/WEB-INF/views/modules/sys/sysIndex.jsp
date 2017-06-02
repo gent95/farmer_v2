@@ -194,12 +194,12 @@
                         $("#notifyNum,#notifyNum2").hide()
                     }
                 });
-
+            }
                 getNotifyNum(); //<c:if test="${oaNotifyRemindInterval ne '' && oaNotifyRemindInterval ne '0'}">
                 setInterval(getNotifyNum, ${oaNotifyRemindInterval}); //</c:if>
                 $(".accordion").after("<div style='font-size: 10px; width: 155px; margin-bottom: 0px; margin-top: 90%;'> Copyright &copy;${fns:getConfig('productName')}</div>");
 
-            }
+
         });
         function dispTime() {
             var nowDate = new Date();
@@ -260,7 +260,9 @@
                         <li><a href="${ctx}/sys/user/modifyPwd" target="mainFrame"><i
                                 class="icon-lock"></i>&nbsp; 修改密码</a></li>
                         <li><a href="${ctx}/message/waringMessage" target="mainFrame"><i
-                                class="icon-bell"></i>&nbsp; 通知预警 <span id="notifyNum2"
+                                class="icon-bell"></i>&nbsp; 通知预警 </a></li>
+                        <li><a href="${ctx}/oa/oaNotify/self" target="mainFrame"><i
+                                class="icon-bell"></i>&nbsp; 我的通知 <span id="notifyNum2"
                                                                         class="label label-info hide"></span></a></li>
                         <li><a href="${ctx}/logout"><i></i>&nbsp; 退出登陆</a></li>
                     </ul>
@@ -275,7 +277,7 @@
                         style="float: left; margin-top: 40px; margin-left: 10px; font-family: 'Microsoft Yahei'; font-size: 60px;"
                         class="temp">${fns:getTemperature().get("temperature") }°
                 </div>
-                <div style="font-size: 16px; font-weight: bold; margin-top: 60px;margin-left: 250px;"><a href="${ctx}/chart/grow">首页</a></div>
+                <div style="font-size: 16px; font-weight: bold; margin-top: 60px;margin-left: 250px;"><a href="${ctx}/grow/goBack">首页</a></div>
             </div>
 
             <div>

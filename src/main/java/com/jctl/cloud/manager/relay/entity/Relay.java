@@ -47,9 +47,12 @@ public class Relay extends DataEntity<Relay> {
 	private Integer nodeNum;
 	private List<Farmland> farmlands;
 
+    public Relay(User user) {
+    	this.user=user;
+    }
 
 
-	public String getName() {
+    public String getName() {
 		return name;
 	}
 

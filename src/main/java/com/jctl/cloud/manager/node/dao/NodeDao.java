@@ -32,5 +32,10 @@ public interface NodeDao extends CrudDao<Node> {
     Integer getNodeNumberByFarmlandId(String farmlandId);
 
     List<Node> selectAllNodeByUserId(String id);
+
     List<Node> getNodeListByFamer(String farmerId);
+
+    void deleteByRelayId(String id);
+
+    void deleteByNodeNum(String nodeNum);
 }

@@ -6,6 +6,7 @@ package com.jctl.cloud.manager.datection.service;
 import com.jctl.cloud.common.persistence.Page;
 import com.jctl.cloud.common.service.CrudService;
 import com.jctl.cloud.manager.datection.dao.DatectionDateDao;
+import com.jctl.cloud.manager.datection.entity.Datection;
 import com.jctl.cloud.manager.datection.entity.DatectionDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

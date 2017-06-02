@@ -157,7 +157,7 @@ public class OfficeController extends BaseController {
 		List<Map<String, Object>> mapList = Lists.newArrayList();
 		List<Role> roles = UserUtils.getRoleList();
 		for (Role role :roles) {
-			if(role.getEnname().equals("farmerBoss") || role.getEnname().equals("farmerWorker")){
+			if(!UserUtils.ifAdmin() && (role.getEnname().equals("farmerBoss") || role.getEnname().equals("farmerWorker"))){
 				Office search =new Office();
 				User user = UserUtils.getUser();
 				search.setName(user.getCompany().getName());

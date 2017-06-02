@@ -6,15 +6,15 @@ require.config({
 });
 
 //人员数量
-function getPeople(url,farmerId){
+function getPeople(url, farmerId) {
     $.ajax({
-       url:url,
-        type:"get",
-        dataType:"json",
-        data:{
-           farmerId:farmerId
+        url: url,
+        type: "get",
+        dataType: "json",
+        data: {
+            farmerId: farmerId
         },
-        success:function(result){
+        success: function (result) {
             getPengAndTianCount(result);
             /*alert("字符串是:"+result.plant);*/
             getPlant(result);
@@ -74,12 +74,12 @@ function getPeople(url,farmerId){
 }
 
 //获取气象站信息
-function getIt(url){
+function getIt(url) {
     $.ajax({
-        url:url,
-        type:"get",
-        dataType:"json",
-        success:function(result){
+        url: url,
+        type: "get",
+        dataType: "json",
+        success: function (result) {
             map(result);
         }
     });
@@ -96,7 +96,6 @@ function map(result) {
         function (ec) {
             // 基于准备好的dom，初始化echarts图表
             var myChart = ec.init(document.getElementById('chart8'));
-
             option = {
                 backgroundColor: 'rgba(181, 219, 255, 0.30)',
                 tooltip: {
@@ -127,6 +126,7 @@ function map(result) {
                     },
                 },
                 series: [{
+                    name: '降雨量',
                     type: 'line',
                     stack: '总量',
                     data: result.rainV
@@ -177,6 +177,7 @@ function map(result) {
                     },
                 },
                 series: [{
+                    name: '光照',
                     type: 'line',
                     stack: '总量',
                     data: result.evaporation
@@ -228,6 +229,7 @@ function map(result) {
                     },
                 },
                 series: [{
+                    name: '风速',
                     type: 'line',
                     stack: '总量',
                     data: result.windSpeed
@@ -279,6 +281,7 @@ function map(result) {
                     },
                 },
                 series: [{
+                    name: '大气湿度',
                     type: 'line',
                     stack: '总量',
                     data: result.humidity
@@ -330,6 +333,7 @@ function map(result) {
                     },
                 },
                 series: [{
+                    name: '气压',
                     type: 'line',
                     stack: '总量',
                     data: result.radiate
@@ -374,6 +378,7 @@ function map(result) {
                     }
                 }],
                 series: [{
+                    name: '大气温度',
                     "type": "bar",
                     "data": result.airTemperature
                 }]
@@ -386,68 +391,68 @@ function map(result) {
 
 
 //获取大棚和大田数量
-function getPengAndTianCount(result){
-            require(
-                [
-                    'echarts',
-                    'echarts/chart/pie' // 使用柱状图就加载bar模块，按需加载
-                ],
-                function (ec) {
-                    // 基于准备好的dom，初始化echarts图表
-                    var myChart = ec.init(document.getElementById('chart33'));
+function getPengAndTianCount(result) {
+    require(
+        [
+            'echarts',
+            'echarts/chart/pie' // 使用柱状图就加载bar模块，按需加载
+        ],
+        function (ec) {
+            // 基于准备好的dom，初始化echarts图表
+            var myChart = ec.init(document.getElementById('chart33'));
 
-                    option = {
-                        backgroundColor: 'rgba(181, 219, 255, 0.30)',
-                        tooltip: {
-                            trigger: 'item',
-                            formatter: "{a} <br/>{b}: {c} ({d}%)"
+            option = {
+                backgroundColor: 'rgba(181, 219, 255, 0.30)',
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b}: {c} ({d}%)"
+                },
+                series: [{
+                    name: '土地类型分布',
+                    type: 'pie',
+                    radius: ['0%', '60%'],
+                    avoidLabelOverlap: false,
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
                         },
-                        series: [{
-                            name: '土地类型分布',
-                            type: 'pie',
-                            radius: ['0%', '60%'],
-                            avoidLabelOverlap: false,
-                            label: {
-                                normal: {
-                                    show: false,
-                                    position: 'center'
-                                },
-                                emphasis: {
-                                    show: true,
-                                    textStyle: {
-                                        fontSize: '30',
-                                        fontWeight: 'bold'
-                                    }
-                                }
-                            },
-                            labelLine: {
-                                normal: {
-                                    show: false
-                                }
-                            },
-                            data: [{
-                                value: result.peng,
-                                name: '大棚'
-                            }, {
-                                value: result.tian,
-                                name: '大田'
-                            }]
-                        }]
-                    };
-                    // 为echarts对象加载数据
-                    myChart.setOption(option);
-                }
-            );
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '30',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data: [{
+                        value: result.peng,
+                        name: '大棚'
+                    }, {
+                        value: result.tian,
+                        name: '大田'
+                    }]
+                }]
+            };
+            // 为echarts对象加载数据
+            myChart.setOption(option);
+        }
+    );
 }
 
 //获取节点和中继数量
-function getNodeAndRelayCount(url,id){
+function getNodeAndRelayCount(url, id) {
     $.ajax({
-        url:url,
-        type:"get",
-        dataType:"json",
-        data:{id:id},
-        success:function(result){
+        url: url,
+        type: "get",
+        dataType: "json",
+        data: {id: id},
+        success: function (result) {
             require(
                 [
                     'echarts',
@@ -506,10 +511,10 @@ function getNodeAndRelayCount(url,id){
 }
 
 //作物分布
-function getPlant(result){
-    var yValue=new Array();
-    for(i=0;i<result.plant.length;i++){
-        yValue[i]=result.plant[i];
+function getPlant(result) {
+    var yValue = new Array();
+    for (var num in result.plant) {
+        yValue.push(result.plant[num]);
     }
     require(
         [
@@ -549,7 +554,7 @@ function getPlant(result){
                             show: false
                         }
                     },
-                    data:yValue
+                    data: yValue
                 }]
             };
             // 为echarts对象加载数据
@@ -559,10 +564,12 @@ function getPlant(result){
 }
 
 
-function getAltis(){
+function getAltis(result) {
 
-    var lat=31.100000;
-    var lng=104.030000;
+    // var lat=31.100000;
+    // var lng=104.030000;
+    var lat = result.lat;
+    var lng = result.lng;
     //在指定的容器内创建地图实例
     var map = new BMap.Map("container");
 
@@ -571,10 +578,10 @@ function getAltis(){
     var marker = new BMap.Marker(point);
     var opts = {
         width: 40,  // 信息窗口宽度
-        height:80,  // 信息窗口高度
+        height: 80,  // 信息窗口高度
         title: "地址" // 信息窗口标题
     }
-    var infoWindow = new BMap.InfoWindow("当前位置<br/>经度:"+lng+"<br/>纬度："+lat, opts); // 创建信息窗口对象
+    var infoWindow = new BMap.InfoWindow("当前位置<br/>经度:" + lng + "<br/>纬度：" + lat, opts); // 创建信息窗口对象
     marker.enableDragging(); //启用拖拽
     marker.addEventListener("dragend", function (e) {
         point = new BMap.Point(e.point.lng, e.point.lat); //标记坐标（拖拽以后的坐标）

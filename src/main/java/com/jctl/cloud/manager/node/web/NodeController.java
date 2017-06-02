@@ -98,36 +98,18 @@ public class NodeController extends BaseController {
     @RequiresPermissions("node:node:view")
     @RequestMapping(value = {"list", ""})
     public String list(Node node, HttpServletRequest request, HttpServletResponse response, Model model) {
-        Page<Node> page = null;
-        List<Farmland> farmlands = null;
-        User user = UserUtils.getUser();
         boolean isAdmin = User.isAdmin(UserUtils.getUser().getId());
-        if (!isAdmin) {
-            List<Role> list = UserUtils.getRoleList();
-            for (Role role : list) {
-                if (role.getEnname().equals(farmerBoss)) {
-                    node.setUser(user);
-                } else {
-                    Farmland search = new Farmland();
-                    search.setUsedId(UserUtils.getUser().getId());
-                    farmlands = farmlandService.findList(search);
-                }
-            }
-        }
-
-        if (farmlands == null) {
-            System.out.println("node的数据是" + node);
+        Page<Node> page = null;
+        try {
+        if (isAdmin) {
             page = nodeService.findPage(new Page<Node>(request, response), node);
         } else {
+            List<Relay> relays = relayService.findList(new Relay(UserUtils.getUser()));
+            node.setRelays(relays);
             page = nodeService.findPage(new Page<Node>(request, response), node);
-            List<Node> list = new ArrayList<>();
-            for (Farmland farmland : farmlands) {
-                Node nodeSearch = new Node();
-                nodeSearch.setFarmlandId(farmland.getId());
-                List<Node> result = nodeService.findList(nodeSearch);
-                list.addAll(result);
-            }
-            page.setList(list);
+        }
+        }catch (Exception e){
+            e.printStackTrace();
         }
         model.addAttribute("page", page);
         return "manager/node/nodeList";
@@ -169,28 +151,28 @@ public class NodeController extends BaseController {
         }
 
         if (node.getRelayId() != null) {
-            if (node.getFarmlandId() != null && !"".equals(node.getFarmlandId())&&node.getFarmlandId() != "-1") {
+            if (node.getFarmlandId() != null && !"".equals(node.getFarmlandId()) && node.getFarmlandId() != "-1") {
                 Farmland farmland = new Farmland();
                 farmland.setId(node.getFarmlandId());
                 Relay re = relayService.get(node.getRelayId().toString());
-                if (re!= null) {
-                    if(re.getFarmer()!=null) {
-                        if(re.getFarmer().getId() != null &&re.getFarmer().getId()!="") {
+                if (re != null) {
+                    if (re.getFarmer() != null) {
+                        if (re.getFarmer().getId() != null && re.getFarmer().getId() != "") {
                             farmland.setFarmer(re.getFarmer());
                             farmland.setRelay(re);
                             farmlandService.updateById(farmland);
                         }
                     }
                 }
-               Farmland fa=farmlandService.get(node.getFarmlandId());
-                if(fa!=null) {
-                    if(fa.getUsedId()!=null&&!"".equals(fa.getUsedId())) {
+                Farmland fa = farmlandService.get(node.getFarmlandId());
+                if (fa != null) {
+                    if (fa.getUsedId() != null && !"".equals(fa.getUsedId())) {
                         node.setUsedId(farmlandService.get(node.getFarmlandId().toString()).getUsedId());
                     }
-                }else{
+                } else {
                     node.setUsedId("");
                 }
-                }
+            }
 
         }
         nodeService.save(node);
@@ -255,24 +237,37 @@ public class NodeController extends BaseController {
         nCC.setNodeId(nodetmp.getNodeNum());
         try {
             NodeCollectionCycle nodeCollectionCycle = nodeCollectionCycleService.findByNodeId(nCC);
-            String min = QutarzUtil.getByQutarzStrMin(nodeCollectionCycle.getCycleTime());
+            String min = "";
+            if ( nodeCollectionCycle.getCycleTime() != null && !nodeCollectionCycle.getCycleTime().equals("")) {
+                min = QutarzUtil.getByQutarzStrMin(nodeCollectionCycle.getCycleTime());
+            }
             model.addAttribute("min", min);
             Map<String, String[]> weeks = new HashMap<>();
-            weeks.put("on", QutarzUtil.qutarzStrConvertWeek(nodeCollectionCycle.getCycleOn()).split(","));
-            weeks.put("off", QutarzUtil.qutarzStrConvertWeek(nodeCollectionCycle.getCycleOff()).split(","));
+            if (nodeCollectionCycle.getCycleOn() != null && !nodeCollectionCycle.getCycleOn().equals("")){
+                weeks.put("on", QutarzUtil.qutarzStrConvertWeek(nodeCollectionCycle.getCycleOn()).split(","));
+            }
+           if (nodeCollectionCycle.getCycleOff() != null && !nodeCollectionCycle.getCycleOff().equals("")){
+               weeks.put("off", QutarzUtil.qutarzStrConvertWeek(nodeCollectionCycle.getCycleOff()).split(","));
+           }
             model.addAttribute("weeks", weeks);
             WaringCycle waringCycle = new WaringCycle();
             waringCycle.setNodeNum(nodetmp.getNodeNum());
             List<WaringCycle> list = waringCycleService.findList(waringCycle);
-            nodeCollectionCycle.setCycleTime(QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleTime()));
-            nodeCollectionCycle.setCycleOn(QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleOn()));
-            nodeCollectionCycle.setCycleOff(QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleOff()));
+            if (nodeCollectionCycle.getCycleTime() != null && !nodeCollectionCycle.getCycleTime().equals("")){
+                nodeCollectionCycle.setCycleTime(QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleTime()));
+            }
+            if (nodeCollectionCycle.getCycleOn()!= null&& !nodeCollectionCycle.getCycleOn().equals("")){
+                nodeCollectionCycle.setCycleOn(QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleOn()));
+            }
+            if (nodeCollectionCycle.getCycleOff() != null && !nodeCollectionCycle.getCycleOff().equals("")){
+                nodeCollectionCycle.setCycleOff(QutarzUtil.qutarzStrConvertTime(nodeCollectionCycle.getCycleOff()));
+            }
             model.addAttribute("waringCycles", list);
             model.addAttribute("nodeCollectionCycle", nodeCollectionCycle);
             model.addAttribute("node", nodetmp);
-
+            QutarzUtil.start();
         } catch (Exception e) {
-            e.printStackTrace();
+           System.out.println(node.getNodeNum()+"节点的定时策略为空，清初始化一个！");
         }
         return "manager/node/strategy";
     }
@@ -299,6 +294,7 @@ public class NodeController extends BaseController {
                 nodeControlUtil.openNode(node);
             }
             result.put("flag", "1");
+            QutarzUtil.start();
         } catch (Exception e) {
             result.put("flag", "0");
             result.put("msg", "设备掉线，或未连接！");
@@ -399,6 +395,7 @@ public class NodeController extends BaseController {
 
     /**
      * 查询最后一条节点数据
+     *
      * @param node
      * @return
      */
@@ -417,6 +414,7 @@ public class NodeController extends BaseController {
                 result.put("flag", 2);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             result.put("flag", 0);
         }
         return result;

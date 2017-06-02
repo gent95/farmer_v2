@@ -12,6 +12,8 @@ import com.jctl.cloud.manager.farmer.entity.Farmer;
 import com.jctl.cloud.manager.farmer.service.FarmerService;
 import com.jctl.cloud.manager.nodedatadetails.entity.NodeDataDetails;
 import com.jctl.cloud.manager.nodedatadetails.service.NodeDataDetailsService;
+import com.jctl.cloud.manager.plant.entity.PlantVariety;
+import com.jctl.cloud.manager.plant.service.PlantVarietyService;
 import com.jctl.cloud.manager.relay.entity.Relay;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,8 @@ public class FarmlandController extends BaseController {
     private RelayService relayService;
     @Autowired
     private NodeDataDetailsService nodeDataDetailsService;
+    @Autowired
+    private PlantVarietyService plantVarietyService;
 
 
     @ModelAttribute
@@ -105,7 +109,6 @@ public class FarmlandController extends BaseController {
         model.addAttribute("user",user);
         model.addAttribute("farmerId",farmer.getId());
         return "manager/farmerland/farmlandListDetail";
-       /*return "manager/home/home1";*/
     }
     @RequestMapping("/getData")
     @ResponseBody
@@ -161,7 +164,10 @@ public class FarmlandController extends BaseController {
             Page<Node> page=nodeService.findPage(new Page<Node>(),node);
             model.addAttribute("page",page);
         }
-
+        PlantVariety plantVariety=new PlantVariety();
+        plantVariety.setCreateBy(UserUtils.getUser());
+        List<PlantVariety> plantVarieties=plantVarietyService.findList(plantVariety);
+        model.addAttribute("plants",plantVarieties);
         model.addAttribute("farmland", farmland);
         return "manager/farmerland/farmlandForm";
     }
@@ -174,7 +180,7 @@ public class FarmlandController extends BaseController {
         }
         if(farmland.getId()==null||farmland.getId().equals("")){
             farmland.setUser(UserUtils.getUser());
-            farmland.setAddTime(new Date());
+            farmland.setCreateDate(new Date());
             farmlandService.save(farmland);
         }
       else

@@ -6,10 +6,10 @@
 		a.id AS "id",
 		a.name AS "name",
 		a.create_date AS "createDate",
-		a.create_by AS "createBy",
+		a.create_by AS "createBy.id",
 		a.update_date AS "updateDate",
 		a.remark AS "remark",
-		a.update_by AS "updateBy"
+		a.update_by AS "updateBy.id"
 	</sql>
 	
 	<sql id="plantVarietyJoins">
@@ -31,12 +31,10 @@
 		<where>
 			<if test="name != null and name != ''">
 				AND a.name LIKE 
-					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
-					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
 					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
 			</if>
 			<if test="createBy!=null and createBy!=''">
-				and a.create_by =#{createBy}
+				and a.create_by =#{createBy.id}
 			</if>
 		</where>
 		<choose>
@@ -87,9 +85,9 @@
 		) VALUES (
 			#{name},
 			#{createDate},
-			#{createBy},
+			#{createBy.id},
 			#{updateDate},
-			#{updateBy},
+			#{updateBy.id},
 			#{remark}
 		)
 	</insert>
@@ -98,9 +96,9 @@
 		UPDATE jc_plan_variety SET 	
 			name = #{name},
 			create_date = #{createDate},
-			create_by = #{createBy},
+			create_by = #{createBy.id},
 			update_date = #{updateDate},
-			update_by = #{updateBy},
+			update_by = #{updateBy.id},
 			remark=#{remark}
 		WHERE id = #{id}
 	</update>

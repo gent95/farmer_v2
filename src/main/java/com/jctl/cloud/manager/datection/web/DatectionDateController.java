@@ -6,6 +6,8 @@ package com.jctl.cloud.manager.datection.web;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.jctl.cloud.manager.datection.entity.Datection;
+import com.jctl.cloud.manager.grow.service.WeatherStationService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -49,7 +51,7 @@ public class DatectionDateController extends BaseController {
 	@RequiresPermissions("datection:datectionDate:view")
 	@RequestMapping(value = {"list", ""})
 	public String list(DatectionDate datectionDate, HttpServletRequest request, HttpServletResponse response, Model model) {
-		Page<DatectionDate> page = datectionDateService.findPage(new Page<DatectionDate>(request, response), datectionDate); 
+		Page<DatectionDate> page = datectionDateService.findPage(new Page<DatectionDate>(request, response), datectionDate);
 		model.addAttribute("page", page);
 		return "manager/datection/datectionDateList";
 	}

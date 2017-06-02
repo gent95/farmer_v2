@@ -45,7 +45,7 @@
 		FROM jc_msg_send a
 		<include refid="msgSendJoins"/>
 		<where>
-		a.ip =#{ip} and a.iphone=#{iphone}
+		a.ip =#{ip} and a.iphone=#{iphone} and DATE_FORMAT(a.add_time,'%Y-%m-%d')=${nowTime}
 		</where>
 	</select>
 	<select id="findAllList" resultType="MsgSend">

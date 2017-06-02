@@ -395,6 +395,7 @@
     <!-- 更新用户信息  -->
     <update id="updateUserInfo">
 		UPDATE sys_user SET
+		    name=#{name},
 			email = #{email},
 			phone = #{phone},
 			single_id = #{singleId},

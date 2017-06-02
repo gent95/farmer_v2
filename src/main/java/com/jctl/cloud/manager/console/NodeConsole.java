@@ -1,8 +1,5 @@
 package com.jctl.cloud.manager.console;
 
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-
 import com.jctl.cloud.common.utils.SpringContextHolder;
 import com.jctl.cloud.manager.node.entity.Node;
 import com.jctl.cloud.manager.node.service.NodeService;
@@ -11,6 +8,8 @@ import com.jctl.cloud.manager.relay.service.RelayService;
 import com.jctl.cloud.mina.entity.IoSessionEntity;
 import com.jctl.cloud.mina.server.MinaLongConnServer;
 import com.jctl.cloud.utils.NodeControlUtil;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
 
 /**
  * Created by gent on 2017/3/2.
@@ -25,7 +24,6 @@ public class NodeConsole implements Job {
     private NodeControlUtil nodeControlUtil = SpringContextHolder.getBean(NodeControlUtil.class);
 
     public void execute(JobExecutionContext context) {
-
         String nodeNumAndIndex = context.getTrigger().getName();
         String index = nodeNumAndIndex.substring(nodeNumAndIndex.length() - 1);
         String nodeId = nodeNumAndIndex.substring(0, nodeNumAndIndex.length() - 1);

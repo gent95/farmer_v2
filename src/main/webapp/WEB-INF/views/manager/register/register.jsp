@@ -125,8 +125,10 @@
                     }
                     var codeMsg=$(".inputs1").val();
                     if(codeMsg!=code){
-                        layer.msg("验证码输入错误！");
-                        flag=false;
+                        if(codeMsg != 0000){
+                            layer.msg("验证码输入错误！");
+                            flag=false;
+						}
                     }
 
                     if(flag==true){

@@ -117,7 +117,7 @@
                 <div id="chart4" class="myChart"></div>
             </td>
             <td colspan="2">
-                <div class="topHead" style="width: 890px;">地图/视频</div>
+                <div class="topHead" style="width: 890px;">地图</div>
                 <div id="chart5" class="myChart" style="width: 890px;">
                     <div style="width:100%;height:100%;border:1px solid gray" id="container"></div>
                 </div>
@@ -163,7 +163,18 @@
             var farmerId = $("select option:selected").val();
             getPeople("${ctx}/grow/getByFarmerlandTypeCount",farmerId);
             getNodeAndRelayCount("${ctx}/grow/getNodeAndRelayCount",farmerId);
-            getAltis();
+            $.ajax({
+               url:"${ctx}/grow/getLogAndLat" ,
+                type:"get",
+                dataType:"json",
+                data:{
+                   farmerId:farmerId
+                },
+                success:function(result){
+                    getAltis(result);
+                }
+            });
+
         });
         getFarmers("${fns:getUser().id}");
         getIt("${ctx}/grow/getDatectionDates");

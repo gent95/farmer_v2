@@ -1,22 +1,21 @@
 package com.jctl.cloud.manager.grow;
 
-import com.jctl.cloud.common.utils.DateUtils;
 import com.jctl.cloud.manager.datection.entity.Datection;
-import com.jctl.cloud.manager.datection.entity.DatectionDate;
-import com.jctl.cloud.manager.datection.service.DatectionDateService;
 import com.jctl.cloud.manager.farmer.entity.Farmer;
 import com.jctl.cloud.manager.farmer.service.FarmerService;
 import com.jctl.cloud.manager.farmerland.entity.Farmland;
 import com.jctl.cloud.manager.farmerland.service.FarmlandService;
 import com.jctl.cloud.manager.grow.service.WeatherStationService;
+import com.jctl.cloud.manager.plant.entity.PlantVariety;
 import com.jctl.cloud.manager.relay.entity.Relay;
 import com.jctl.cloud.manager.relay.service.RelayService;
+import com.jctl.cloud.modules.sys.entity.Role;
 import com.jctl.cloud.modules.sys.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.jctl.cloud.modules.sys.entity.Role;
+
 import java.util.*;
 
 /**
@@ -25,8 +24,6 @@ import java.util.*;
 @Controller
 @RequestMapping("${adminPath}/grow")
 public class GrowContoller {
-    @Autowired
-    private DatectionDateService datectionDateService;
 
     @Autowired
     private RelayService relayService;
@@ -39,6 +36,7 @@ public class GrowContoller {
 
     @Autowired
     private WeatherStationService weatherStationService;
+
     private List plantSes;
 
     /**
@@ -54,10 +52,10 @@ public class GrowContoller {
         farmer.setUser(UserUtils.getUser());
 //        List<Farmer> farmers = farmerService.findList(new Farmer());
         List<Farmer> farmers = new ArrayList<>();
-        for (Role role:UserUtils.getRoleList() ) {
-            if (role.getEnname().equals("dept")){
+        for (Role role : UserUtils.getRoleList()) {
+            if (role.getEnname().equals("dept")) {
                 farmers = farmerService.findList(new Farmer());
-            }else{
+            } else {
                 farmers = farmerService.findFarmerByUserId(farmer);
             }
         }
@@ -76,7 +74,7 @@ public class GrowContoller {
     @ResponseBody
     public Map getDatectionDates() {
         Map result = new HashMap();
-        try{
+        try {
             List<Datection> datections = weatherStationService.getData();
 
             List<String> winSpeed = new LinkedList<>();
@@ -95,7 +93,7 @@ public class GrowContoller {
                 radiate.add(datections.get(i).getRadiate());
                 windDirection.add(datections.get(i).getWindDirection());
                 evaporation.add(datections.get(i).getEvaporation());
-                date.add(datections.get(i).getCreateDate());
+                date.add(datections.get(i).getCreateDate().split(" ")[1]);
             }
             result.put("windSpeed", winSpeed);
             result.put("airTemperature", airTemperature);
@@ -105,7 +103,7 @@ public class GrowContoller {
             result.put("windDirection", windDirection);
             result.put("evaporation", evaporation);
             result.put("dateTime", date);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -151,13 +149,18 @@ public class GrowContoller {
     @ResponseBody
     public Map getByFarmerlandTypeCount(Farmland farmland) {
         Map result = new HashMap();
+        farmland.setCreateBy(UserUtils.getUser());
         result.put("peng", farmlandService.findPengCount(farmland));
         result.put("tian", farmlandService.findTianCount(farmland));
+
         List<Farmland> farmlands = farmlandService.findPlantTypeCountByFarmerId(farmland);
         int usedCount = 0;
         int userCount = 0;
-        List plant = new ArrayList();
+
+
+        List<Map<String, Object>> plant = new ArrayList();
         String[] propertys = new String[]{"value", "name"};
+        Set<String> users = new HashSet<>();
         for (Farmland tmpFarmland : farmlands) {
             if (tmpFarmland.getPlantVaritety() != null && !tmpFarmland.getPlantVaritety().equals("")) {
                 Map map = new HashMap();
@@ -173,14 +176,15 @@ public class GrowContoller {
             if (tmpFarmland.getUsedId() != null && !tmpFarmland.getUsedId().equals("")) {
                 usedCount++;
             }
-            if (tmpFarmland.getUserId() != null && !tmpFarmland.getUserId().equals("")) {
-                userCount++;
+            if (tmpFarmland.getUser().getId() != null && !tmpFarmland.getUser().getId().equals("")) {
+                users.add(tmpFarmland.getUser().getId());
             }
         }
-
+        userCount = users.size();
         if (userCount == 0) {
             userCount = 1;
         }
+
         result.put("plant", plant);
         result.put("userCount", userCount);
         result.put("usedCount", usedCount);
@@ -198,10 +202,9 @@ public class GrowContoller {
     public Map getLogAndLat(Relay relay) {
         Map result = new HashMap();
         Relay tmpRelay = relayService.getByFamerId(relay.getFarmerId().toString());
-        result.put("log", tmpRelay.getLog());
+        result.put("lng", tmpRelay.getLog());
         result.put("lat", tmpRelay.getLat());
         return result;
-
     }
 
     @RequestMapping("getOne")

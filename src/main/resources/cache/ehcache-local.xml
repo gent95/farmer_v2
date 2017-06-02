@@ -12,6 +12,8 @@
 
 	<!-- 用户缓存 -->
 	<cache name="userCache" maxEntriesLocalHeap="1000" eternal="true" overflowToDisk="true" statistics="true"/>
+	<!-- 验证码保存 3分钟 -->
+	<cache name="verCode" maxEntriesLocalHeap="1000" eternal="false" timeToIdleSeconds="180" overflowToDisk="true" statistics="true"/>
 
 	<!-- API用户缓存    自最后一次使用后15天失效   没有使用过 自第一次创建15天失效-->
 	<cache name="apiUserCache" maxEntriesLocalHeap="10000" eternal="false" timeToIdleSeconds="1296000" timeToLiveSeconds="1296000"

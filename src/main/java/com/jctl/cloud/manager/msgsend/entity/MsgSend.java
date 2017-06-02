@@ -24,7 +24,16 @@ public class MsgSend extends DataEntity<MsgSend> {
 	private String addUserId;		// add_user_id
 	private Date updateTime;		// update_time
 	private String updateUserId;		// update_user_id
-	
+	private String nowTime;
+
+	public String getNowTime() {
+		return nowTime;
+	}
+
+	public void setNowTime(String nowTime) {
+		this.nowTime = nowTime;
+	}
+
 	public MsgSend() {
 		super();
 	}

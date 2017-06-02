@@ -19,7 +19,6 @@
 		a.relay_id AS "relayId",
 		r.relay_num AS "relayName",
 		a.cycle AS "cycle",
-		a.del_flag AS "delFlag",
 		a.add_user_id AS "addUserId",
 		a.add_time AS "addTime",
 		a.update_user_id AS "updateUserId",
@@ -74,28 +73,23 @@
 		JOIN jc_node a ON b.id = a.relay_id
 		WHERE
 		b.user_id = #{id}
-		and 	a.del_flag = 1
 	</select>
     <select id="getNodeListByFamer" resultType="Node">
 		SELECT * FROM jc_node a
 		INNER JOIN jc_farmland f ON a.farmland_id=f.id
-		WHERE a.farmland_id IN (SELECT id FROM jc_farmland WHERE farmer_id=#{farmerId}) and 	a.del_flag = 1
+		WHERE a.farmland_id IN (SELECT id FROM jc_farmland WHERE farmer_id=#{farmerId})
 	</select>
     <select id="getNodeNum" resultType="java.lang.Integer">
 		SELECT
 			COUNT(*)
 		FROM jc_node a
 		WHERE a.relay_id = #{relayId}
-		AND
-		a.del_flag =1
 	</select>
     <select id="getNodeNumberByFarmlandId" resultType="java.lang.Integer">
 		SELECT
 		COUNT(*)
 		FROM jc_node a
 		WHERE a.farmland_id = #{farmlandId}
-		AND
-		a.del_flag =1
 	</select>
     <select id="findList" resultType="Node">
         SELECT
@@ -103,7 +97,6 @@
         FROM jc_node a
         <include refid="nodeJoins"/>
         <where>
-            a.del_flag = 1
             <if test="nodeNum != null and nodeNum != ''">
                 AND a.node_num LIKE concat('%',#{nodeNum},'%')
             </if>
@@ -118,6 +111,12 @@
             </if>
             <if test="relayId !=null and relayId !=''">
                 AND a.relay_id =#{relayId}
+            </if>
+            <if test="relays !=null ">
+                AND a.relay_id in
+                <foreach collection="relays" item="relays" index="index"
+                         open="(" separator="," close=")">#{relays.id}
+                </foreach>
             </if>
         </where>
         <choose>
@@ -135,7 +134,6 @@
         FROM jc_node a
         <include refid="nodeJoins"/>
         <where>
-            a.del_flag = 1
         </where>
         <choose>
             <when test="page !=null and page.orderBy != null and page.orderBy != ''">
@@ -151,7 +149,7 @@
         FROM jc_node a
         <include refid="nodeJoins"/>
         <where>
-            a.del_flag = 1 AND a.node_num = #{nodeNum}
+            a.node_num = #{nodeNum}
         </where>
     </select>
     <insert id="insert">
@@ -200,9 +198,7 @@
 
     <update id="update">
         UPDATE jc_node SET
-        <if test="nodeNum != null and nodeNum != ''">
-            node_num = #{nodeNum},
-        </if>
+
         <if test="type != null and type != ''">
             type = #{type},
         </if>
@@ -257,14 +253,22 @@
         <if test="farmlandId != null and farmlandId != ''">
             farmland_id=#{farmlandId},
         </if>
-        del_flag=1
+        node_num = #{nodeNum}
         WHERE id = #{id}
     </update>
 
     <update id="delete">
-		UPDATE jc_node SET 
-			del_flag = #{delFlag}
+		DELETE FROM  jc_node
 		WHERE id = #{id}
+	</update>
+
+    <update id="deleteByNodeNum">
+		DELETE FROM  jc_node
+		WHERE node_num = #{nodeNum}
+	</update>
+    <update id="deleteByRelayId">
+		DELETE  FROM jc_node
+		WHERE relay_id = #{id}
 	</update>
 
 </mapper>

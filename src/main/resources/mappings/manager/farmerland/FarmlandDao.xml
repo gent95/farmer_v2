@@ -41,13 +41,14 @@
         FROM jc_farmland a
         <include refid="farmlandJoins"/>
         <where>
-        a.del_flag = 0
+            a.del_flag = 0
             <if test="farmer != null and farmer.id != '' and farmer.id!=null">
                 AND a.farmer_id=#{farmer.id}
             </if>
             GROUP BY a.plant_variety
         </where>
     </select>
+
     <select id="findPlantTypeCountByFarmerId" resultType="Farmland">
         SELECT
         <include refid="farmlandColumns"/>
@@ -77,7 +78,7 @@
     <select id="findListAll" resultType="Farmland">
         SELECT
         <include refid="farmlandColumns"/>
-        ,(SELECT COUNT(*) FROM jc_node WHERE a.id = farmland_id and del_flag=1) nodeNumber
+        ,(SELECT COUNT(*) FROM jc_node WHERE a.id = farmland_id ) nodeNumber
         FROM jc_farmland a
         <include refid="farmlandJoins"/>
         <where>
@@ -135,7 +136,7 @@
     <select id="findList" resultType="Farmland">
         SELECT
         <include refid="farmlandColumns"/>
-        ,(SELECT COUNT(*) FROM jc_node WHERE a.id = farmland_id and del_flag=1) nodeNumber
+        ,(SELECT COUNT(*) FROM jc_node WHERE a.id = farmland_id) nodeNumber
         FROM jc_farmland a
         <include refid="farmlandJoins"/>
         <where>
@@ -194,11 +195,11 @@
     </select>
 
     <select id="findPengCount" resultType="Integer">
-		SELECT COUNT(id) FROM  jc_farmland a where farmer_id = #{farmerId} AND alias LIKE '%棚';
+		SELECT COUNT(1) FROM  jc_farmland a where farmer_id = #{farmerId} AND land_type = 0
 	</select>
 
     <select id="findTianCount" resultType="Integer">
-		SELECT COUNT(id) FROM  jc_farmland a where farmer_id = #{farmerId} AND alias LIKE '%田';
+		SELECT COUNT(1) FROM  jc_farmland a where farmer_id = #{farmerId} AND land_type = 1
 	</select>
 
     <select id="findAllList" resultType="Farmland">
@@ -261,56 +262,56 @@
 	</insert>
 
     <update id="update">
-		UPDATE jc_farmland SET
+        UPDATE jc_farmland SET
         <if test="farmlandNum != null ">
-		farmland_num=#{farmlandNum},
+            farmland_num=#{farmlandNum},
         </if>
         <if test="alias != null ">
-		alias=#{alias},
+            alias=#{alias},
         </if>
         <if test="landType != null ">
-		land_type =#{landType},
+            land_type =#{landType},
         </if>
         <if test="plantVaritety != null ">
-		plant_variety=#{plantVaritety},
+            plant_variety=#{plantVaritety},
         </if>
         <if test="user != null and user.id != null ">
-		user_id =#{user.id},
+            user_id =#{user.id},
         </if>
         <if test="usedId != null ">
-		used_id=#{usedId},
+            used_id=#{usedId},
         </if>
         <if test="assigneTime != null ">
-		assigne_time=#{assigneTime},
+            assigne_time=#{assigneTime},
         </if>
         <if test="farmer != null and farmer.id  != null ">
-		farmer_id =#{farmer.id},
+            farmer_id =#{farmer.id},
         </if>
         <if test="area != null ">
-		area=#{area},
+            area=#{area},
         </if>
         <if test="addr != null ">
-		addr=#{addr},
+            addr=#{addr},
         </if>
         <if test="relay != null and relay.id  != null ">
-		realy_id =#{relay.id},
+            realy_id =#{relay.id},
         </if>
         <if test="orderNum != null ">
-		order_num =#{orderNum},
+            order_num =#{orderNum},
         </if>
         <if test="useFlag != null ">
-		use_flag=#{useFlag},
+            use_flag=#{useFlag},
         </if>
-		create_by =#{createBy.id},
-		create_date =#{createDate},
-		update_by =#{updateBy.id},
-		update_date = #{updateDate},
+        create_by =#{createBy.id},
+        create_date =#{createDate},
+        update_by =#{updateBy.id},
+        update_date = #{updateDate},
         <if test="addr != null ">
-		remarks =#{remarks},
+            remarks =#{remarks},
         </if>
         del_flag =#{delFlag}
-		WHERE id = #{id}
-	</update>
+        WHERE id = #{id}
+    </update>
     <update id="updateFarmland">
 			UPDATE jc_farmland SET
 		farmland_num=#{farmlandNum},
@@ -352,9 +353,7 @@
 	</update>
 
     <update id="delete">
-		UPDATE jc_farmland SET 
-			del_flag = 1
-		WHERE id = #{id}
+		DELETE  FROM  jc_farmland  WHERE id = #{id}
 	</update>
 
 </mapper>

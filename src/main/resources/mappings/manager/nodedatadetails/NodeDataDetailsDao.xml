@@ -148,14 +148,15 @@
                 a.power AS "power",
                 a.frequency_point AS "frequencyPoint",
                 a.power_supply AS "powerSupply",
+                DATE_FORMAT(a.add_time,'%Y-%m-%d %H') AS "nowTime2",
                 DATE_FORMAT(a.add_time,'%H:%i') AS "nowTime"
          FROM jc_node_data_details a WHERE a.node_Mac IN (SELECT n.node_num FROM jc_node n
          INNER JOIN jc_farmland f ON n.farmland_id=f.id
          WHERE n.farmland_id IN (SELECT id FROM jc_farmland WHERE farmer_id=#{farmerId})) and a.air_temperature!='0.00'
-         GROUP BY DATE_FORMAT(add_time,'%Y-%m-%d %H')
-         ORDER BY add_time DESC
+         GROUP BY DATE_FORMAT(a.add_time,'%Y-%m-%d %H')
+         ORDER BY add_time DESC  LIMIT 8
       ) res
-      ORDER BY res.nowTime ASC
+      ORDER BY res.nowTime2 ASC
     </select>
     <select id="findDetail" resultType="NodeDataDetails">
         SELECT

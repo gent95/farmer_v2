@@ -177,7 +177,14 @@
 		<div class="control-group">
 			<label class="control-label">种植种类：</label>
 			<div class="controls">
-				<form:input path="plantVaritety" htmlEscape="false" class="input-xlarge required"/>
+
+				<%--<form:input path="plantVaritety" htmlEscape="false" class="input-xlarge required"/>--%>
+				<select name="plantVaritety"class="input-xlarge required">
+					<option value="-1">——请选择——</option>
+					<c:forEach items="${plants}" var="plant">
+						<option value="${plant.name}" <c:if test="${farmland.plantVaritety eq plant.name}">selected="selected"</c:if> >${plant.name}</option>
+					</c:forEach>
+				</select>
 		</div>
 		</div>
 		<div class="control-group">
@@ -224,8 +231,8 @@
 				<label class="control-label">建立时间：</label>
 				<div class="controls">
 
-					<input name="addTime" type="text" readonly="readonly" maxlength="20" class="input-medium Wdate "
-						   value="<fmt:formatDate value="${farmland.addTime}" pattern="yyyy-MM-dd"/>"/>
+					<input name="createDate" type="text" readonly="readonly" maxlength="20" class="input-medium Wdate "
+						   value="<fmt:formatDate value="${farmland.createDate}" pattern="yyyy-MM-dd"/>"/>
 				</div>
 			</div>
 			<div class="control-group">

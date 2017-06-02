@@ -13,10 +13,10 @@
 		a.use_flag AS "useFlag",
 		a.del_flag AS "delFlag",
 		a.remarks AS "remarks",
-		a.add_time AS "addTime",
-		a.add_user_id AS "addUserId",
-		a.update_time AS "updateTime",
-		a.update_user_id AS "updateUserId",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
 		u6.name AS "user.name",
 		u.name AS "usedName",
 		a.addr AS "addr"
@@ -153,10 +153,10 @@
         plant_variety,
         user_id,
         remarks,
-        add_time,
-        add_user_id,
-        update_time,
-        update_user_id,
+        create_date,
+			create_by,
+			update_date,
+			update_by,
         used_id,
         addr
         ) VALUES (
@@ -166,10 +166,10 @@
         #{plantVariety},
         #{user.id},
         #{remarks},
-        #{addTime},
-        #{addUserId},
-        #{updateTime},
-        #{updateUserId},
+     	#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id},
         #{usedId},
         #{addr}
         )
@@ -201,23 +201,15 @@
         <if test="useFlag != null ">
             use_flag = #{useFlag},
         </if>
-        <if test="addTime != null ">
-            add_time = #{addTime},
-        </if>
-        <if test="addUserId != null ">
-            add_user_id = #{addUserId},
-        </if>
-        <if test="updateTime != null ">
-            update_time = #{updateTime},
-        </if>
+        create_date = #{createDate},
+        create_by = #{createBy.id},
+        update_date = #{updateDate},
+        update_by = #{updateBy.id},
         <if test="addr != null ">
             addr=#{addr},
         </if>
         <if test="remarks != null ">
             remarks=#{remarks},
-        </if>
-        <if test="updateUserId != null ">
-            update_user_id = #{updateUserId},
         </if>
         del_flag=#{delFlag}
         WHERE id = #{id}

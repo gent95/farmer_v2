@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+datectionDateList.jsp<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ include file="/WEB-INF/views/include/taglib.jsp"%>
 <html>
 <head>
@@ -19,22 +19,7 @@
 <body>
 	<ul class="nav nav-tabs">
 		<li class="active"><a href="${ctx}/datection/datectionDate/">设备数据列表</a></li>
-		<!--<shiro:hasPermission name="datection:datectionDate:edit"><li><a href="${ctx}/datection/datectionDate/form">设备数据添加</a></li></shiro:hasPermission>-->
 	</ul>
-	<form:form id="searchForm" modelAttribute="datectionDate" action="${ctx}/datection/datectionDate/" method="post" class="breadcrumb form-search">
-		<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}"/>
-		<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}"/>
-		<ul class="ul-form">
-			<li><label>检测时间：</label>
-				<input name="createDate" type="text" readonly="readonly" maxlength="20" class="input-medium Wdate"
-					value="<fmt:formatDate value="${datectionDate.createDate}" pattern="yyyy-MM-dd HH:mm:ss"/>"
-					onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',isShowClear:false});"/>
-			</li>
-			<li class="btns"><input id="btnSubmit" class="btn btn-primary" type="submit" value="查询"/></li>
-			<li class="clearfix"></li>
-		</ul>
-	</form:form>
-	<sys:message content="${message}"/>
 	<table id="contentTable" class="table table-striped table-bordered table-condensed">
 		<thead>
 			<tr>

@@ -118,7 +118,7 @@
     <select id="findList" resultType="Relay">
         SELECT
         <include refid="relayColumns"/>
-        ,(SELECT COUNT(*) FROM jc_node WHERE a.id = relay_id and del_flag=1) nodeNum
+        ,(SELECT COUNT(*) FROM jc_node WHERE a.id = relay_id ) nodeNum
         FROM jc_relay a
         <include refid="relayJoins"/>
         <where>
@@ -208,7 +208,9 @@
         relay_num,
         name,
         binding_time,
-            farmer_id,
+        <if test="farmer!= null or farmerId!= null">
+        farmer_id,
+        </if>
         log,
         lat,
         area,
@@ -233,6 +235,45 @@
         <if test="farmerId!= null and farmerId != ''">
             #{farmerId},
         </if>
+        #{log},
+        #{lat},
+        #{area},
+        #{user.id},
+        #{used.id},
+        #{ip},
+        #{powerSupply},
+        #{ports},
+        #{orderNum},
+        #{useFalg},
+        #{addTime},
+        #{addUserId},
+        #{updateUserId},
+        #{updateTime}
+        )
+    </insert>
+    <insert id="registerNew">
+        INSERT INTO jc_relay(
+        relay_num,
+        name,
+        farmer_id,
+        log,
+        lat,
+        area,
+        user_id,
+        used_id,
+        ip,
+        power_supply,
+        ports,
+        order_num,
+        use_falg,
+        add_time,
+        add_user_id,
+        update_user_id,
+        update_time
+        ) VALUES (
+        #{relayNum},
+        #{name},
+        #{bindingTime},
         #{log},
         #{lat},
         #{area},

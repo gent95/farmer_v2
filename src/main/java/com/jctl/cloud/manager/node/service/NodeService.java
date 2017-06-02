@@ -47,7 +47,10 @@ public class NodeService extends CrudService<NodeDao, Node> {
         return super.findPage(page, node);
     }
 
-    public  List<Node> getNodeListByFamer(String farmerId){return nodeDao.getNodeListByFamer(farmerId);}
+    public List<Node> getNodeListByFamer(String farmerId) {
+        return nodeDao.getNodeListByFamer(farmerId);
+    }
+
     @Transactional(readOnly = false)
     public void save(Node node) {
         super.save(node);
@@ -66,17 +69,16 @@ public class NodeService extends CrudService<NodeDao, Node> {
         if (clintMacs == null) {
             return;
         }
+
         for (String clintMac : clintMacs) {
             Node temp = nodeDao.getByNodeMac(clintMac);
             if (temp == null) {
-//                Relay relay = relayService.get(relayId);
                 Node newNode = new Node(clintMac, relayId, new Date());
-//                if (relay != null && relay.getUser() != null) {
-//                    newNode.setUser(relay.getUser());
-//                }else{
-                    newNode.setUser(new User("1"));
-//                }
+                newNode.setUser(new User("1"));
                 save(newNode);
+            } else {
+                temp.setRelayId(relayId);
+                save(temp);
             }
         }
     }
@@ -101,9 +103,11 @@ public class NodeService extends CrudService<NodeDao, Node> {
     public Node getByNodeNum(String nodeNum) {
         return nodeDao.getByNodeNum(nodeNum);
     }
-    public Node findByNodeNum(String nodeNum){
+
+    public Node findByNodeNum(String nodeNum) {
         return nodeDao.findByNodeNum(nodeNum);
     }
+
     ;
 
     public Integer getNodeNumberByFarmlandId(String farmlandId) {
@@ -114,5 +118,16 @@ public class NodeService extends CrudService<NodeDao, Node> {
 
         return nodeDao.selectAllNodeByUserId(id);
 
+    }
+
+    @Transactional(readOnly = false)
+    public void deleteByRelayId(String id) {
+        nodeDao.deleteByRelayId(id);
+    }
+
+    @Transactional(readOnly = false)
+    public void deleteByNodeNum(String nodeNum) {
+
+            nodeDao.deleteByNodeNum(nodeNum);
     }
 }

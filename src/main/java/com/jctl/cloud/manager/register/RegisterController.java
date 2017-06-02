@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -54,7 +55,7 @@ public class RegisterController {
     }
 
 
-     /**
+    /**
      * 跳转到注册页面
      *
      * @param request
@@ -95,25 +96,28 @@ public class RegisterController {
     @RequestMapping("/checkUserName")
     public @ResponseBody
     Map<String, Object> checkName(HttpServletRequest request, String name) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String sdate = sdf.format(new Date());
         Map<String, Object> maps = Maps.newHashMap();
         User user = systemService.getUserByLoginName(name);
-        MsgSend msgSend=new MsgSend();
-        msgSend.setIphone(name);
-        msgSend.setIp(IpUtil.getIp());
-        List<MsgSend> lists=msgSendService.findListNumber(msgSend);
-        maps.put("number",lists.size());
-        if (user != null) {
-            maps.put("status", "0");
-        }
-        if (user == null) {
-            maps.put("status", "1");
-        }
+            MsgSend msgSend = new MsgSend();
+            msgSend.setIphone(name);
+            msgSend.setIp(IpUtil.getIp());
+            msgSend.setNowTime(sdate);
+            List<MsgSend> lists = msgSendService.findListNumber(msgSend);
+            maps.put("number", lists.size());
+            if (user != null) {
+                maps.put("status", "0");
+            }
+            if (user == null) {
+                maps.put("status", "1");
+            }
         return maps;
     }
 
     /**
      * 注册用户
-     *
+0     *
      * @param request
      * @param user
      * @return
@@ -125,11 +129,11 @@ public class RegisterController {
         try {
             user.setPhone(user.getLoginName());
             user.setMobile(user.getLoginName());
-            if ("farmerBoss".equals(eName) || eName == "farmerBoss") {
+            if ("farmerBoss".equals(eName)) {
                 user.setCompanyName(farmerName);
                 officeService.doRegister(user);
             }
-            if ("farmerWorker".equals(eName) || eName == "farmerWorker") {
+            if ("farmerWorker".equals(eName) ) {
                 Role role = roleService.findByEname("farmerWorker");
                 user.setRole(role);
                 if (officeName != null && officeName != "") {
@@ -198,26 +202,27 @@ public class RegisterController {
     Map<String, Object> validateMsg(HttpServletRequest request, String name) {
         Map<String, Object> maps = Maps.newHashMap();
         String mesCheckCode = SmsUtil.getVerification(request, name);
-        MsgSend msgSend=new MsgSend();
-            msgSend.setIphone(name);
-            msgSend.setIp(IpUtil.getIp());
-            msgSend.setAddTime(new Date());
-            msgSendService.save(msgSend);
+        MsgSend msgSend = new MsgSend();
+        msgSend.setIphone(name);
+        msgSend.setIp(IpUtil.getIp());
+        msgSend.setAddTime(new Date());
+        msgSendService.save(msgSend);
         maps.put("msgCode", mesCheckCode);
         return maps;
     }
 
     @RequestMapping("sendList")
     @ResponseBody
-    public Map sendList(String name){
-        Map result=Maps.newHashMap();
-        MsgSend msgSend=new MsgSend();
+    public Map sendList(String name) {
+        Map result = Maps.newHashMap();
+        MsgSend msgSend = new MsgSend();
         msgSend.setIphone(name);
         msgSend.setIp(IpUtil.getIp());
-        List<MsgSend> lists=msgSendService.findListNumber(msgSend);
-        result.put("number",lists.size());
+        List<MsgSend> lists = msgSendService.findListNumber(msgSend);
+        result.put("number", lists.size());
         return result;
     }
+
     /**
      * 跳转到修改密码页面
      */

@@ -57,9 +57,14 @@ public class PlantVarietyController extends BaseController {
 	@RequiresPermissions("plant:plantVariety:view")
 	@RequestMapping(value = {"list", ""})
 	public String list(PlantVariety plantVariety, HttpServletRequest request, HttpServletResponse response, Model model) {
-		Boolean isadmin= User.isAdmin(UserUtils.getUser().getId());
-		Page<PlantVariety> page = plantVarietyService.findPage(new Page<PlantVariety>(request, response), plantVariety);
-		model.addAttribute("page", page);
+		plantVariety.setCreateBy(UserUtils.getUser());
+		try{
+			Page<PlantVariety> page = plantVarietyService.findPage(new Page<PlantVariety>(request, response), plantVariety);
+			model.addAttribute("page", page);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+
 		return "manager/plant/plantVarietyList";
 	}
 

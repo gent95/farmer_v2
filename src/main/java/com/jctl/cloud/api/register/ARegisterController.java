@@ -47,7 +47,7 @@ public class ARegisterController {
     public Map<String, String> register(User user) {
         Map result = new HashMap();
         try {
-            Integer code = (Integer) CacheUtils.get(user.getMobile());
+            Integer code = (Integer) CacheUtils.getVerCode(user.getMobile());
             if (user.getVerCode() == null || !user.getVerCode().equals(code.toString())) {
                 result.put("flag", "0");
                 result.put("msg", "验证码不正确！");
@@ -103,7 +103,7 @@ public class ARegisterController {
             HttpsRequest req = new HttpsRequest();
             Integer code = req.sendSms("POST", request.getSession(), request, mobile);
             smsHistoryService.save(new SmsHistory(IpUtil.getIpAddress(request), mobile, code));
-            CacheUtils.put(mobile, code);
+            CacheUtils.putVerCode(mobile, code);
             result.put("flag", 1);
             result.put("code", code);
         } catch (Exception e) {

@@ -102,21 +102,21 @@ RelayController extends BaseController {
     public String form(Relay relay, Model model) {
         Farmer farmer = new Farmer();
         Node node = new Node();
-        boolean isAdmin = User.isAdmin(UserUtils.getUser().getId());
-        if (!isAdmin) {
-            List<Role> roles = UserUtils.getRoleList();
-            for (Role r : roles) {
-                if (r.getEnname().equals(farmerBoss)) {
-                    farmer.setUser(UserUtils.getUser());
-                    node.setUser(UserUtils.getUser());
-                }
-
-            }
-        }
+//        boolean isAdmin = User.isAdmin(UserUtils.getUser().getId());
+//        if (!isAdmin) {
+//            List<Role> roles = UserUtils.getRoleList();
+//            for (Role r : roles) {
+//                if (r.getEnname().equals(farmerBoss)) {
+//                    farmer.setUser(UserUtils.getUser());
+//                    node.setUser(UserUtils.getUser());
+//                }
+//
+//            }
+//        }
         if (relay.getId() != null && relay.getId() != "") {
-            node.setRelayId(Long.parseLong(relay.getId()));
-            Page<Node> pages = nodeService.findPage(new Page<Node>(), node);
-            model.addAttribute("page", pages);
+            node.setRelayId(relay.getId());
+            List<Node> nodes = nodeService.findList(node);
+            model.addAttribute("nodes", nodes);
         }
         List<Farmer> farmers = farmerService.findList(farmer);
         model.addAttribute("famers", farmers);
@@ -143,7 +143,7 @@ RelayController extends BaseController {
                 relay.setUser(user);
                 relay.setFarmer(farmer);
                 Node node = new Node();
-                node.setRelayId(Long.valueOf(relay.getId()));
+                node.setRelayId(relay.getId());
                 List<Node> nodes = nodeService.findList(node);
                 if (nodes != null && nodes.size() > 0) {
                     Node node1;
@@ -206,7 +206,7 @@ RelayController extends BaseController {
             List<String> mapKeyList = new ArrayList<>(maps.keySet());
 
             List<IoSessionEntity> list = new ArrayList<>();
-            for (String str: mapKeyList ) {
+            for (String str : mapKeyList) {
                 list.add(maps.get(str));
             }
             model.addAttribute("list", list);

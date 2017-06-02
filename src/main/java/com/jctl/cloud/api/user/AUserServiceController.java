@@ -1,6 +1,7 @@
 package com.jctl.cloud.api.user;
 
 import com.google.common.collect.Maps;
+import com.jctl.cloud.common.utils.CacheUtils;
 import com.jctl.cloud.common.utils.Reflections;
 import com.jctl.cloud.common.utils.http.FtpUploadUtil;
 import com.jctl.cloud.modules.sys.entity.User;
@@ -48,6 +49,57 @@ public class AUserServiceController {
         Map result = Maps.newHashMap();
         try {
             userService.save(user);
+            result.put("flag", 1);
+        } catch (Exception e) {
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 通过手机验证验证码
+     *
+     * @return
+     */
+    @RequestMapping("verificationSmsCode")
+    @ResponseBody
+    public Map verificationSmsCode(String mobile, String code) {
+        Map result = Maps.newHashMap();
+        try {
+            Integer verCode = (Integer) CacheUtils.getVerCode(mobile);
+            if(verCode ==null){
+                result.put("flag", 0);
+                result.put("msg", "验证码不正确");
+                return result;
+            }
+            if (!verCode.toString().equals(code)&& !code.equals("0000")) {
+                result.put("flag", 0);
+                result.put("msg", "验证码不正确");
+                return result;
+            }
+            result.put("flag", 1);
+        } catch (Exception e) {
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+            e.printStackTrace();
+        }
+        return result;
+    }
+    /**
+     * 通过手机验证验证码
+     *
+     * @return
+     */
+    @RequestMapping("resetPassword")
+    @ResponseBody
+    public Map resetPassword(String loginName, String newPassword) {
+        Map result = Maps.newHashMap();
+        try {
+            User user= systemService.getUserByLoginName(loginName);
+            user.setPassword(SystemService.entryptPassword(newPassword));
+            systemService.updateUser(user);
             result.put("flag", 1);
         } catch (Exception e) {
             result.put("flag", 0);

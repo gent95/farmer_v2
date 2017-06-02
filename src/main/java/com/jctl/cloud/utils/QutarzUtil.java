@@ -1,20 +1,19 @@
 package com.jctl.cloud.utils;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.quartz.CronTrigger;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerFactory;
-import org.quartz.impl.StdSchedulerFactory;
-
 import com.jctl.cloud.common.utils.SpringContextHolder;
 import com.jctl.cloud.manager.console.NodeConsole;
 import com.jctl.cloud.manager.node.entity.Node;
 import com.jctl.cloud.manager.node.service.NodeService;
 import com.jctl.cloud.manager.timingstrategy.entity.NodeCollectionCycle;
 import com.jctl.cloud.manager.timingstrategy.service.NodeCollectionCycleService;
+import org.quartz.CronTrigger;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author gent
@@ -59,8 +58,6 @@ public class QutarzUtil {
             if (node == null) {
                 continue;
             }
-
-            if (node.getDelFlag().equals("1")) {
                 /**
                  * 循环策略
                  */
@@ -96,7 +93,6 @@ public class QutarzUtil {
                         scheduler.scheduleJob(jobDetail, cronTrigger);
                     }
                 }
-            }
         }
         // 初始化任务只需要执行一次，执行一次后移除初始化触发器
         scheduler.unscheduleJob("InitTrigger", Scheduler.DEFAULT_GROUP);

@@ -135,7 +135,9 @@
 	
 	<update id="delete">
 		DELETE FROM jc_datection_date
-		WHERE id = #{id}
+		<if test="id != null and id != ''">
+			WHERE id = #{id}
+		</if>
 	</update>
 	
 </mapper>

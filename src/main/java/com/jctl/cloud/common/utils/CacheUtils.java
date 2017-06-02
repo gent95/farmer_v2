@@ -24,6 +24,8 @@ public class CacheUtils {
 	
 	private static final String SYS_CACHE = "sysCache";
 
+	private static final String VER_CODE = "verCode";
+
 	/**
 	 * 获取SYS_CACHE缓存
 	 * @param key
@@ -32,7 +34,25 @@ public class CacheUtils {
 	public static Object get(String key) {
 		return get(SYS_CACHE, key);
 	}
-	
+
+	/**
+	 * 验证码
+	 * @param key
+	 * @return
+	 */
+	public static Object getVerCode(String key) {
+		return get(VER_CODE, key);
+	}
+
+	/**
+	 * 验证码
+	 * @param key
+	 * @return
+	 */
+	public static void putVerCode(String key,Object value) {
+		put(VER_CODE, key, value);
+	}
+
 	/**
 	 * 获取SYS_CACHE缓存
 	 * @param key

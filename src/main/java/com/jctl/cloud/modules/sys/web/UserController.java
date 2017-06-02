@@ -281,6 +281,7 @@ public class UserController extends BaseController {
 				model.addAttribute("message", "演示模式，不允许操作！");
 				return "modules/sys/userInfo";
 			}
+			currentUser.setName(user.getName());
 			currentUser.setEmail(user.getEmail());
 			currentUser.setPhone(user.getPhone());
 			currentUser.setMobile(user.getMobile());
