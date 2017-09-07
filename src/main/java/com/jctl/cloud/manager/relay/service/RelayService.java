@@ -6,6 +6,7 @@ package com.jctl.cloud.manager.relay.service;
 import java.util.Date;
 import java.util.List;
 
+import io.goeasy.GoEasy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +65,8 @@ public class RelayService extends CrudService<RelayDao, Relay> {
     private SystemService systemService;
     @Autowired
     private NodeControlUtil nodeControlUtil;
+
+    private static String WARMING_MESG_TITLE = "预警通知";
 
     private final String message_code = "尊敬的用户您好，当前检测到设备";
 
@@ -270,8 +273,8 @@ public class RelayService extends CrudService<RelayDao, Relay> {
         search.setNodeNum(nodeData.getNodeMac());
         List<WaringCycle> list = waringCycleService.findList(search);
         Relay relay = get(nodeService.findByNodeNum(nodeData.getNodeMac()).getRelayId());
-        IoSessionEntity session = MinaLongConnServer.sessionMap.get(relay.getRelayNum());
         Node node = nodeService.findByNodeNum(nodeData.getNodeMac());
+        GoEasy goEasy = new GoEasy("BC-d14d4984a76247e99820ceb5f3ac219c");
         if (list != null && list.size() > 0) {
             for (WaringCycle waringCycle : list) {
                 try {
@@ -279,26 +282,26 @@ public class RelayService extends CrudService<RelayDao, Relay> {
                     if (waringCycle.getProperty().equals("airTemperature")) {
                         if (nodeData.getAirTemperature() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气温度", 1, "airTemperature"));
-//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
                             nodeControlUtil.closeNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"大气温度超出正常范围,设备已自动关闭!");
                         }
                         if (nodeData.getAirTemperature() < waringCycle.getMin()) {
-//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             waringMessageService.save(getWaringMessage(nodeData, "大气温度", 0, "airTemperature"));
                             nodeControlUtil.openNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"大气温度超出正常范围,设备已自动开启!");
                         }
                     }
                     //大气湿度
                     if (waringCycle.getProperty().equals("airHumidity")) {
                         if (nodeData.getAirHumidity() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气湿度", 1, "airHumidity"));
-//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
                             nodeControlUtil.closeNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"大气温度超出正常范围,设备已自动关闭!");
                         }
                         if (nodeData.getAirHumidity() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气湿度", 0, "airHumidity"));
-//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             nodeControlUtil.openNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"大气温度超出正常范围,设备已自动关闭!");
                         }
                     }
 
@@ -306,13 +309,13 @@ public class RelayService extends CrudService<RelayDao, Relay> {
                     if (waringCycle.getProperty().equals("soilHumidity1")) {
                         if (nodeData.getSoilHumidity1() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "1号采集点温度", 1, "soilHumidity1"));
-//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
                             nodeControlUtil.closeNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                         if (nodeData.getSoilHumidity1()  < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "1号采集点温度", 0, "soilHumidity1"));
-//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             nodeControlUtil.openNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                     }
 
@@ -320,78 +323,78 @@ public class RelayService extends CrudService<RelayDao, Relay> {
                     if (waringCycle.getProperty().equals("soilTemperature1")) {
                         if (nodeData.getSoilTemperature1() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "1号采集点湿度", 1, "soilTemperature1"));
-//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
                             nodeControlUtil.closeNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                         if (nodeData.getSoilTemperature1() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "1号采集点湿度", 0, "soilTemperature1"));
-//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             nodeControlUtil.openNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                     }
                     //2号采集点温度
                     if (waringCycle.getProperty().equals("soilHumidity2")) {
                         if (nodeData.getSoilHumidity2() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点温度", 1, "soilHumidity2"));
-//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
                             nodeControlUtil.closeNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                         if (nodeData.getSoilHumidity2() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点温度", 0, "soilHumidity2"));
-//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             nodeControlUtil.openNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                     }
                     //2号采集点湿度
                     if (waringCycle.getProperty().equals("soilTemperature2")) {
                         if (nodeData.getSoilTemperature2() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点湿度", 1, "soilTemperature2"));
-//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
                             nodeControlUtil.closeNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                         if (nodeData.getSoilTemperature2() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点湿度", 0, "soilTemperature2"));
-//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             nodeControlUtil.openNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                     }
                     //2号采集点温度
                     if (waringCycle.getProperty().equals("soilHumidity3")) {
                         if (nodeData.getSoilHumidity3() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气湿度", 1, "soilHumidity3"));
-//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
                             nodeControlUtil.closeNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                         if (nodeData.getSoilHumidity3() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气湿度", 0, "soilHumidity3"));
-//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             nodeControlUtil.openNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                     }
                     //2号采集点湿度
                     if (waringCycle.getProperty().equals("soilTemperature3")) {
                         if (nodeData.getSoilTemperature3() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点湿度", 1, "soilTemperature3"));
-//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
                             nodeControlUtil.closeNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                         if (nodeData.getSoilTemperature3() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点湿度", 0, "soilTemperature3"));
-//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             nodeControlUtil.openNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                     }
                     //二氧化碳浓度
                     if (waringCycle.getProperty().equals("co2")) {
                         if (nodeData.getCo2() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "二氧化碳浓度", 1, "co2"));
-//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
                             nodeControlUtil.closeNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                         if (nodeData.getCo2() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "二氧化碳浓度", 0, "co2"));
-//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             nodeControlUtil.openNode(node);
+                            goEasy.publish(WARMING_MESG_TITLE,"1号采集点温度超出正常范围,设备已自动关闭!");
                         }
                     }
                 } catch (Exception e) {

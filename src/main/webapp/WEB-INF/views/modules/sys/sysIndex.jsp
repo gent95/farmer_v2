@@ -16,6 +16,7 @@
               href="${ctxStatic}/jerichotab/css/jquery.jerichotab.css"/>
         <script type="text/javascript"
                 src="${ctxStatic}/jerichotab/js/jquery.jerichotab.js"></script>
+
     </c:if>
     <style type="text/css">
         #main {
@@ -67,6 +68,16 @@
             color: white;
         }
     </style>
+    <script type="text/javascript" src="http://cdn.goeasy.io/goeasy.js"></script>
+    <script type="text/javascript">
+        var goEasy = new GoEasy({appkey: 'BC-d14d4984a76247e99820ceb5f3ac219c'});
+        goEasy.subscribe({
+            channel: '预警通知',
+            onMessage: function(message){
+                alert(message.content);
+            }
+        });
+    </script>
     <script type="text/javascript">
 
 
@@ -367,6 +378,7 @@
         $.fn.jerichoTab.resize();
     } // </c:if>
 </script>
+
 <script src="${ctxStatic}/common/wsize.min.js" type="text/javascript"></script>
 </body>
 </html>

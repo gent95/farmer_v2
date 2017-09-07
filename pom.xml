@@ -58,6 +58,11 @@
 			<name>Repository</name>
 			<url>http://maven.aliyun.com/nexus/content/groups/public</url>
 		</repository>
+		<repository>
+			<id>goeasy</id>
+			<name>goeasy</name>
+			<url>http://maven.goeasy.io/content/repositories/releases/</url>
+		</repository>
 	</repositories>
 
 	<!-- 依赖项定义 -->
@@ -605,6 +610,14 @@
 			<classifier>jdk15</classifier>
 		</dependency>
 		<!-- BaiduPush end -->
+
+		<!--goeasy publish start-->
+		<dependency>
+			<groupId>io.goeasy</groupId>
+			<artifactId>goeasy-sdk</artifactId>
+			<version>0.3.5</version>
+		</dependency>
+		<!--goeasy publish end-->
 
 		<!--pingyin4j start-->
 		<dependency>
