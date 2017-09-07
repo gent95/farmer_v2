@@ -35,9 +35,9 @@ public abstract class DataEntity<T> extends BaseEntity<T> {
     protected String delFlag;    // 删除标记（0：正常；1：删除；2：审核）
     protected String userId;
 
-    protected Integer pageNum;
+    protected Integer pageNum;  //页码数 默认第一页
 
-    protected Integer startNum;
+    protected Integer startNum;  //起始行数
 
 
     public Integer getPageNum() {

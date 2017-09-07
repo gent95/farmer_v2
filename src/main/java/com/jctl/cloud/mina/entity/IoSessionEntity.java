@@ -85,7 +85,7 @@ public class IoSessionEntity
     }
 
     public void clear() {
-        log.debug("Nothing to do.");
+        log.debug("nothing to do.");
         //
     }
 

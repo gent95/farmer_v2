@@ -71,7 +71,6 @@ public class ARegisterController {
                     result.put("msg", "注册成功！");
                 }
             }
-
         } catch (Exception e) {
             result.put("flag", 0);
             result.put("msg", "操作失败！");

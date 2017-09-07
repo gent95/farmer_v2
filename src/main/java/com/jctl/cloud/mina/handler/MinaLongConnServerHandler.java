@@ -83,6 +83,7 @@ public class MinaLongConnServerHandler extends IoHandlerAdapter {
         //hashCode缓存动态修改的
         if (resultOrderStr.equals("DT")) {
             IoSessionCacheManager.changeHashCodeCacheMap(session);
+            session.write(new String(Main.sendGatewayOrders()).trim());
         }
         //如果返回的信息为空，停止解析
         if (resultOrderStr == null || resultOrderStr.equals("") || resultOrderStr.trim().length() < 7) {

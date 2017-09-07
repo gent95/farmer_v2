@@ -99,17 +99,18 @@
             <bean class="com.jctl.cloud.modules.sys.interceptor.LogInterceptor"/>
         </mvc:interceptor>
         <!--API的登陆拦截器-->
-        <!--<mvc:interceptor>-->
-            <!--<mvc:mapping path="/admin/**"/>-->
-            <!--<mvc:mapping path="/farmer/**"/>-->
-            <!--<mvc:mapping path="/farmland/**"/>-->
-            <!--<mvc:mapping path="/waringmsg/**"/>-->
-            <!--<mvc:mapping path="/node/**"/>-->
-            <!--<mvc:mapping path="/relay/**"/>-->
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/**"/>
+            <mvc:mapping path="/farmer/**"/>
+            <mvc:mapping path="/farmland/**"/>
+            <mvc:mapping path="/waringmsg/**"/>
+            <mvc:mapping path="/node/**"/>
+            <mvc:mapping path="/relay/**"/>
             <!--<mvc:mapping path="/user/**"/>-->
-            <!--<mvc:mapping path="/timing/**"/>-->
-            <!--<bean class="com.jctl.cloud.api.filter.LoginInterceptor"/>-->
-        <!--</mvc:interceptor>-->
+            <mvc:mapping path="/timing/**"/>
+            <mvc:mapping path="/help/**"/>
+            <bean class="com.jctl.cloud.api.interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
     </mvc:interceptors>
 
     <!-- 支持Shiro对Controller的方法级AOP安全控制 begin-->

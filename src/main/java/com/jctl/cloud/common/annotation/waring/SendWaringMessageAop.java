@@ -44,9 +44,6 @@ public class SendWaringMessageAop {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         new ArrayList<>().contains("");
     }
-
-
 }

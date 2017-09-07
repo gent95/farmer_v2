@@ -68,4 +68,8 @@ public class UserService {
     public List<User> findAllUser() {
         return userDao.findList(new User());
     }
+
+    public List<User> findNumByCompany(User user) {
+        return userDao.findNumByCompany(user);
+    }
 }

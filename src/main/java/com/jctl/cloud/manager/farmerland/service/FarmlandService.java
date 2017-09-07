@@ -100,4 +100,8 @@ public class FarmlandService extends CrudService<FarmlandDao, Farmland> {
     public List<Farmland> findPlant(Farmland farmland) {
         return farmlandDao.findPlant(farmland);
     }
+
+    public Integer findFarmlandNum(Farmland farmland) {
+        return farmlandDao.findFarmlandNum(farmland);
+    }
 }

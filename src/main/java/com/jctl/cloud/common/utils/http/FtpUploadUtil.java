@@ -217,8 +217,8 @@ public class FtpUploadUtil implements JCTLConfig {
             ftpClient.connect("61.149.204.178");
             ftpClient.login("upload", "123456");
 
-            String remoteFileName = "/admin/pic/3.gif";
-            fos = new FileOutputStream("c:/1111.png");
+            String remoteFileName = "/20170424/8b9318e5554540a3b873330df1d80ba2.png";
+            fos = new FileOutputStream("c:/4596fc013a2e44a69eba25dff72c0679.png");
 
             ftpClient.setBufferSize(1024);
             //设置文件类型（二进制）

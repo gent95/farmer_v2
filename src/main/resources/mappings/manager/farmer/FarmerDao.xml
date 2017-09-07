@@ -73,7 +73,7 @@
     </select>
 
     <select id="findFarmerByUserId" resultType="Farmer">
-        SELECT * from jc_farmer where user_id =#{userId}
+        SELECT * from jc_farmer where user_id =#{user.id}
     </select>
 
     <select id="findListAll" resultType="Farmer">

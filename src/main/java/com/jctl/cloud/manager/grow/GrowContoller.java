@@ -100,7 +100,7 @@ public class GrowContoller {
             result.put("humidity", humidity);
             result.put("rainV", rainV);
             result.put("radiate", radiate);
-            result.put("windDirection", windDirection);
+        /*    result.put("windDirection", windDirection);*/
             result.put("evaporation", evaporation);
             result.put("dateTime", date);
         } catch (Exception e) {

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.jctl.cloud.common.persistence.Page;
 import com.jctl.cloud.common.service.CrudService;
+import com.jctl.cloud.common.utils.SpringContextHolder;
 import com.jctl.cloud.manager.farmer.service.FarmerService;
 import com.jctl.cloud.manager.message.entity.WaringMessage;
 import com.jctl.cloud.manager.message.service.WaringMessageService;
@@ -26,9 +27,12 @@ import com.jctl.cloud.manager.waring.entity.WaringCycle;
 import com.jctl.cloud.manager.waring.service.WaringCycleService;
 import com.jctl.cloud.mina.entity.DataResultSet;
 import com.jctl.cloud.mina.entity.GatewayResultSet;
+import com.jctl.cloud.mina.entity.IoSessionEntity;
 import com.jctl.cloud.mina.entity.OpenCloseVO;
 import com.jctl.cloud.mina.entity.ResultSet;
+import com.jctl.cloud.mina.server.MinaLongConnServer;
 import com.jctl.cloud.modules.sys.service.SystemService;
+import com.jctl.cloud.utils.NodeControlUtil;
 
 /**
  * 中继管理Service
@@ -58,7 +62,8 @@ public class RelayService extends CrudService<RelayDao, Relay> {
     private FarmerService farmerService;
     @Autowired
     private SystemService systemService;
-
+    @Autowired
+    private NodeControlUtil nodeControlUtil;
 
     private final String message_code = "尊敬的用户您好，当前检测到设备";
 
@@ -89,7 +94,7 @@ public class RelayService extends CrudService<RelayDao, Relay> {
 
     //增加自定义aop
     @Transactional(readOnly = false)
-    public void saveOrUpdate(ResultSet resultSet) {
+    public void                                                                                                                                                                                         saveOrUpdate(ResultSet resultSet) {
         //节点详情
 
         saveOrChangeRelayAndNode(resultSet);
@@ -264,91 +269,129 @@ public class RelayService extends CrudService<RelayDao, Relay> {
         WaringCycle search = new WaringCycle();
         search.setNodeNum(nodeData.getNodeMac());
         List<WaringCycle> list = waringCycleService.findList(search);
-
+        Relay relay = get(nodeService.findByNodeNum(nodeData.getNodeMac()).getRelayId());
+        IoSessionEntity session = MinaLongConnServer.sessionMap.get(relay.getRelayNum());
+        Node node = nodeService.findByNodeNum(nodeData.getNodeMac());
         if (list != null && list.size() > 0) {
             for (WaringCycle waringCycle : list) {
                 try {
-                    //大气温度
+                	 //大气温度
                     if (waringCycle.getProperty().equals("airTemperature")) {
                         if (nodeData.getAirTemperature() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气温度", 1, "airTemperature"));
+//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.closeNode(node);
                         }
                         if (nodeData.getAirTemperature() < waringCycle.getMin()) {
+//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
                             waringMessageService.save(getWaringMessage(nodeData, "大气温度", 0, "airTemperature"));
+                            nodeControlUtil.openNode(node);
                         }
                     }
                     //大气湿度
                     if (waringCycle.getProperty().equals("airHumidity")) {
-                        if (nodeData.getAirTemperature() > waringCycle.getMax()) {
+                        if (nodeData.getAirHumidity() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气湿度", 1, "airHumidity"));
+//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.closeNode(node);
                         }
-                        if (nodeData.getAirTemperature() < waringCycle.getMin()) {
+                        if (nodeData.getAirHumidity() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气湿度", 0, "airHumidity"));
+//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.openNode(node);
                         }
                     }
 
                     //1号采集点温度
                     if (waringCycle.getProperty().equals("soilHumidity1")) {
-                        if (nodeData.getAirTemperature() > waringCycle.getMax()) {
+                        if (nodeData.getSoilHumidity1() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "1号采集点温度", 1, "soilHumidity1"));
+//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.closeNode(node);
                         }
-                        if (nodeData.getAirTemperature() < waringCycle.getMin()) {
+                        if (nodeData.getSoilHumidity1()  < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "1号采集点温度", 0, "soilHumidity1"));
+//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.openNode(node);
                         }
                     }
 
                     //1号采集点湿度
                     if (waringCycle.getProperty().equals("soilTemperature1")) {
-                        if (nodeData.getAirTemperature() > waringCycle.getMax()) {
+                        if (nodeData.getSoilTemperature1() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "1号采集点湿度", 1, "soilTemperature1"));
+//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.closeNode(node);
                         }
-                        if (nodeData.getAirTemperature() < waringCycle.getMin()) {
+                        if (nodeData.getSoilTemperature1() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "1号采集点湿度", 0, "soilTemperature1"));
+//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.openNode(node);
                         }
                     }
                     //2号采集点温度
                     if (waringCycle.getProperty().equals("soilHumidity2")) {
-                        if (nodeData.getAirTemperature() > waringCycle.getMax()) {
+                        if (nodeData.getSoilHumidity2() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点温度", 1, "soilHumidity2"));
+//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.closeNode(node);
                         }
-                        if (nodeData.getAirTemperature() < waringCycle.getMin()) {
+                        if (nodeData.getSoilHumidity2() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点温度", 0, "soilHumidity2"));
+//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.openNode(node);
                         }
                     }
                     //2号采集点湿度
                     if (waringCycle.getProperty().equals("soilTemperature2")) {
-                        if (nodeData.getAirTemperature() > waringCycle.getMax()) {
+                        if (nodeData.getSoilTemperature2() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点湿度", 1, "soilTemperature2"));
+//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.closeNode(node);
                         }
-                        if (nodeData.getAirTemperature() < waringCycle.getMin()) {
+                        if (nodeData.getSoilTemperature2() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点湿度", 0, "soilTemperature2"));
+//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.openNode(node);
                         }
                     }
                     //2号采集点温度
                     if (waringCycle.getProperty().equals("soilHumidity3")) {
-                        if (nodeData.getAirTemperature() > waringCycle.getMax()) {
+                        if (nodeData.getSoilHumidity3() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气湿度", 1, "soilHumidity3"));
+//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.closeNode(node);
                         }
-                        if (nodeData.getAirTemperature() < waringCycle.getMin()) {
+                        if (nodeData.getSoilHumidity3() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "大气湿度", 0, "soilHumidity3"));
+//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.openNode(node);
                         }
                     }
                     //2号采集点湿度
                     if (waringCycle.getProperty().equals("soilTemperature3")) {
-                        if (nodeData.getAirTemperature() > waringCycle.getMax()) {
+                        if (nodeData.getSoilTemperature3() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点湿度", 1, "soilTemperature3"));
+//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.closeNode(node);
                         }
-                        if (nodeData.getAirTemperature() < waringCycle.getMin()) {
+                        if (nodeData.getSoilTemperature3() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "2号采集点湿度", 0, "soilTemperature3"));
+//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.openNode(node);
                         }
                     }
                     //二氧化碳浓度
                     if (waringCycle.getProperty().equals("co2")) {
-                        if (nodeData.getAirTemperature() > waringCycle.getMax()) {
+                        if (nodeData.getCo2() > waringCycle.getMax()) {
                             waringMessageService.save(getWaringMessage(nodeData, "二氧化碳浓度", 1, "co2"));
+//                            nodeControlUtil.closeNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.closeNode(node);
                         }
-                        if (nodeData.getAirTemperature() < waringCycle.getMin()) {
+                        if (nodeData.getCo2() < waringCycle.getMin()) {
                             waringMessageService.save(getWaringMessage(nodeData, "二氧化碳浓度", 0, "co2"));
+//                            nodeControlUtil.openNode(session, nodeData.getNodeMac());
+                            nodeControlUtil.openNode(node);
                         }
                     }
                 } catch (Exception e) {

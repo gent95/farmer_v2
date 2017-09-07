@@ -9,6 +9,8 @@ import com.jctl.cloud.common.supcan.annotation.treelist.cols.SupCol;
 import com.jctl.cloud.common.utils.Collections3;
 import com.jctl.cloud.common.utils.excel.annotation.ExcelField;
 import com.jctl.cloud.common.utils.excel.fieldtype.RoleListType;
+import com.jctl.cloud.manager.farmerland.entity.Farmland;
+import com.jctl.cloud.manager.node.entity.Node;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
@@ -50,6 +52,28 @@ public class User extends DataEntity<User> {
     private Date oldLoginDate;	// 上次登陆日期
 
     private Role role;	// 根据角色查询用户条件
+
+
+
+    private Integer farmlands;
+    private Integer nodes;
+
+
+    public Integer getFarmlands() {
+        return farmlands;
+    }
+
+    public void setFarmlands(Integer farmlands) {
+        this.farmlands = farmlands;
+    }
+
+    public Integer getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(Integer nodes) {
+        this.nodes = nodes;
+    }
 
     public String getVerCode() {
         return verCode;
@@ -377,4 +401,12 @@ public class User extends DataEntity<User> {
         this.channelId = channelId;
     }
 
+    public boolean isFarmerBoss() {
+        for (Role role :roleList) {
+            if(role.getEnname().equals("farmerBoss")){
+                return true;
+            }
+        }
+        return false;
+    }
 }

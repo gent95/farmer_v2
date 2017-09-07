@@ -92,6 +92,51 @@ public class ANodeController {
     }
 
     /**
+     * 节点列表进去的节点详情数据
+     *
+     * @param
+     * @return
+     */
+    @RequestMapping("nodeDetailList")
+    @ResponseBody
+    public Map nodeDetailList(String nodeId) {
+        Map result = Maps.newHashMap();
+        List lists = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        NodeDataDetails nodeDataDetails=new NodeDataDetails();
+        try {
+            Node node = nodeService.get(nodeId);
+            nodeDataDetails.setNodeMac(node.getNodeNum());
+            List<NodeDataDetails> nodeDataDetailsLists = nodeDataDetailsService.findList(nodeDataDetails);
+            if (nodeDataDetailsLists != null || nodeDataDetailsLists.size() > 0) {
+                for (NodeDataDetails dataDetails : nodeDataDetailsLists) {
+                    String[] proper = new String[]{"addTime","airTemperature", "airHumidity", "soilTemperature1", "soilHumidity1", "soilTemperature2", "soilHumidity2", "soilTemperature3", "soilHumidity3", "co2", "openFlag", "power","id", "nodeMac","nodeName"};
+                    Map maps = Maps.newHashMap();
+                    for (String property : proper) {
+                        if (property == "addTime") {
+                            maps.put(property, sdf.format(dataDetails.getAddTime()));
+                        }else if(property=="nodeName"){
+                            maps.put(property,node.getNodeAlise());
+                        } else {
+                            maps.put(property, Reflections.invokeGetter(dataDetails, property));
+                        }
+                    }
+                    lists.add(maps);
+                }
+                result.put("flag", "1");
+                result.put("info", lists);
+            } else {
+                result.put("flag", "0");
+                result.put("msg", "抱歉未查询到数据");
+            }
+        } catch (Exception e) {
+            result.put("flag", "0");
+            result.put("msg", "操作失败");
+        }
+        return result;
+    }
+
+    /**
      * 节点管理
      */
     @RequestMapping("list")
@@ -101,7 +146,6 @@ public class ANodeController {
         List lists = new ArrayList();
         try {
             node.preSearch();
-            node.setDelFlag("1");
             List<Node> nodeList = nodeService.findList(node);
             if (nodeList != null || nodeList.size() > 0) {
                 String[] proper = new String[]{"id", "nodeNum", "farmlandName", "usedName", "power", "nodeAlise", "onOffName"};

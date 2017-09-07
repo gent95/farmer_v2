@@ -272,7 +272,7 @@
             <%--天气--%>
             <div
                     style="height: 100px; width: 300px; float: left; margin-top: 10px">
-                <img style="float: left;" src="/static/js/regions/img/fog.png">
+               <a href="http://www.nmc.cn/"> <img style="float: left;" src="/static/js/regions/img/fog.png"></a>
                 <div
                         style="float: left; margin-top: 40px; margin-left: 10px; font-family: 'Microsoft Yahei'; font-size: 60px;"
                         class="temp">${fns:getTemperature().get("temperature") }°

@@ -50,16 +50,19 @@ public class SerialPort {
     			//中继电量
         		gatewayResultSet.setPowerSupply(threePartResult[1].substring(2));
         		List<String> clientMacList = new ArrayList<String>();
-
-        		String clientMacStr = threePartResult[2].substring(2);
-        		if(clientMacStr != null && !"".equals(clientMacStr)){
-        			String[] clientMacArray = clientMacStr.split(",");
-            		Collections.addAll(clientMacList,clientMacArray);
-            		//中继下子节点Mac
-            		gatewayResultSet.setClientMacList(clientMacList);
-        		}else{
-        			gatewayResultSet.setClientMacList(null);
-        		}
+      //判断数组
+              //  System.out.println(threePartResult.length+"------------------------------------------------------------------------");
+                if (threePartResult.length>2) {
+                    String clientMacStr = threePartResult[2].substring(2);
+                    if (clientMacStr != null && !"".equals(clientMacStr)) {
+                        String[] clientMacArray = clientMacStr.split(",");
+                        Collections.addAll(clientMacList, clientMacArray);
+                        //中继下子节点Mac
+                        gatewayResultSet.setClientMacList(clientMacList);
+                    } else {
+                        gatewayResultSet.setClientMacList(null);
+                    }
+                }
         		//添加中继数据
         		resultSet.setGatewayResultSet(gatewayResultSet);
     		}

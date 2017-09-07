@@ -143,15 +143,11 @@
             a.del_flag =0
             <if test="farmlandNum != null and farmlandNum != ''">
                 AND a.farmland_num LIKE
-                <if test="dbName == 'oracle'">'%'||#{farmlandNum}||'%'</if>
-                <if test="dbName == 'mssql'">'%'+#{farmlandNum}+'%'</if>
                 <if test="dbName == 'mysql'">concat('%',#{farmlandNum},'%')</if>
                 #{farmlandNum}
             </if>
             <if test="plantVaritety!= null and plantVaritety!= ''">
                 AND a.plant_variety LIKE
-                <if test="dbName == 'oracle'">'%'||#{plantVaritety}||'%'</if>
-                <if test="dbName == 'mssql'">'%'+#{plantVaritety}+'%'</if>
                 <if test="dbName == 'mysql'">concat('%',#{plantVaritety},'%')</if>
             </if>
             <if test="user != null and user.id != null and user.id != ''">
@@ -196,6 +192,9 @@
 
     <select id="findPengCount" resultType="Integer">
 		SELECT COUNT(1) FROM  jc_farmland a where farmer_id = #{farmerId} AND land_type = 0
+	</select>
+    <select id="findFarmlandNum" resultType="Integer">
+		SELECT COUNT(1) FROM  jc_farmland a where used_id = #{usedId}
 	</select>
 
     <select id="findTianCount" resultType="Integer">

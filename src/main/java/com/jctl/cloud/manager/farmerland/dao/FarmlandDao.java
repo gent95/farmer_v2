@@ -33,4 +33,6 @@ public interface FarmlandDao extends CrudDao<Farmland> {
 
     void updateByApp(Farmland farmland);
     List<Farmland> findPlant(Farmland farmland);
+
+    Integer findFarmlandNum(Farmland farmland);
 }

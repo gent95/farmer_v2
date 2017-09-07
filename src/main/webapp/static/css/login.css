@@ -114,8 +114,8 @@ a{
 	margin-right: 65%;
 }
 .btn{
-	margin-top: 6%;
-	margin: 0 auto;
+	margin-top:2%;
+	/*margin: 0 auto;*/
 	background: url(/static/images/login/yuanjiao-3.png);
 	height: 41px;
 	width: 191px;
@@ -123,20 +123,12 @@ a{
 	border: 0px;
 	font-size: 20.45px;
 	color: #FFFFFF;
-	margin-left: 25%;
+	margin-left: 28%;
 }
 .footer{
 	text-align: center;
 	font-size: 12px;
-	margin-top: 10.5%;
-}
-.wenjian{
-	text-align: right;
-	margin-top:-1.5%;
-	margin-right: 5%;
-}
-.wenjian a{
-	margin-right:1%;
+	margin-top: 11.5%;
 }
 .required{
 	border-radius:6px;

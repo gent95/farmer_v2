@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.jctl.cloud.common.utils.Reflections;
 import com.jctl.cloud.manager.nodedatadetails.entity.NodeDataDetails;
 import com.jctl.cloud.manager.nodedatadetails.service.NodeDataDetailsService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -113,6 +114,43 @@ public class NodeController extends BaseController {
         }
         model.addAttribute("page", page);
         return "manager/node/nodeList";
+    }
+    @RequestMapping("nodelist")
+    @ResponseBody
+    public Map nodeList(Node node) {
+        Map result = Maps.newHashMap();
+        List lists = new ArrayList();
+        List<Node> nodeList=null;
+        try {
+            boolean isAdmin = User.isAdmin(UserUtils.getUser().getId());
+            if (isAdmin) {
+               nodeList = nodeService.findList(node);
+            }else {
+                List<Relay> relays = relayService.findList(new Relay(UserUtils.getUser()));
+                node.setRelays(relays);
+                nodeList = nodeService.findList(node);
+            }
+            if (nodeList != null || nodeList.size() > 0) {
+                String[] proper = new String[]{"id", "nodeNum", "farmlandName", "usedName", "power", "nodeAlise", "onOffName","openFlag"};
+                for (Node no : nodeList) {
+                    Map maps = Maps.newHashMap();
+                    for (String property : proper) {
+                        maps.put(property, Reflections.invokeGetter(no, property));
+                    }
+                    lists.add(maps);
+                }
+                result.put("flag", 1);
+                result.put("info", lists);
+            } else {
+                result.put("flag", 0);
+                result.put("msg", "抱歉未查询到数据");
+            }
+        } catch (Exception e) {
+            result.put("flag", 0);
+            result.put("msg", "操作失败");
+            e.printStackTrace();
+        }
+        return result;
     }
 
 

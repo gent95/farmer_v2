@@ -461,5 +461,17 @@
         WHERE a.del_flag = #{DEL_FLAG_NORMAL}
         AND a.company_id=#{company.id}
     </select>
+    <!-- 分页查询用户信息 -->
+    <select id="findNumByCompany" resultType="User">
+        SELECT
+        a.id,
+        a.name,
+        a.phone,
+        (SELECT COUNT(1) FROM  jc_farmland  where used_id = a.id) farmLands,
+        (SELECT COUNT(1) FROM  jc_node  where used_id = a.id) nodes
+        FROM sys_user a
+        WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+        AND a.company_id=#{company.id}
+    </select>
 
 </mapper>

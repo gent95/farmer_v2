@@ -52,6 +52,10 @@ public class Farmland extends DataEntity<Farmland> {
     private String farmerId;//备注
     private int plantNum; //作物种类数量
 
+    public Farmland(User user) {
+     this.usedId=user.getId();
+    }
+
     public String getName() {
         return name;
     }

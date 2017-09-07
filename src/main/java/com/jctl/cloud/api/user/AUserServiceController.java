@@ -4,6 +4,8 @@ import com.google.common.collect.Maps;
 import com.jctl.cloud.common.utils.CacheUtils;
 import com.jctl.cloud.common.utils.Reflections;
 import com.jctl.cloud.common.utils.http.FtpUploadUtil;
+import com.jctl.cloud.manager.farmerland.entity.Farmland;
+import com.jctl.cloud.manager.farmerland.service.FarmlandService;
 import com.jctl.cloud.modules.sys.entity.User;
 import com.jctl.cloud.modules.sys.service.SystemService;
 import com.jctl.cloud.modules.sys.service.UserService;
@@ -36,7 +38,13 @@ public class AUserServiceController {
     private SystemService systemService;
 
 
+    @Autowired
+    private FarmlandService farmlandService;
+
+
     private List<String> imgs = Arrays.asList("png", "jpg", "jpeg");
+
+    private static final String regex = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,16}$";
 
     /**
      * 更新个人信息
@@ -45,8 +53,8 @@ public class AUserServiceController {
      * @return
      */
     @RequestMapping("update")
-    public Map update(User user) {
-        Map result = Maps.newHashMap();
+    public Map<String, Object> update(User user) {
+        Map<String, Object> result = Maps.newHashMap();
         try {
             userService.save(user);
             result.put("flag", 1);
@@ -63,30 +71,10 @@ public class AUserServiceController {
      *
      * @return
      */
-    @RequestMapping("verificationSmsCode")
-    @ResponseBody
-    public Map verificationSmsCode(String mobile, String code) {
-        Map result = Maps.newHashMap();
-        try {
-            Integer verCode = (Integer) CacheUtils.getVerCode(mobile);
-            if(verCode ==null){
-                result.put("flag", 0);
-                result.put("msg", "验证码不正确");
-                return result;
-            }
-            if (!verCode.toString().equals(code)&& !code.equals("0000")) {
-                result.put("flag", 0);
-                result.put("msg", "验证码不正确");
-                return result;
-            }
-            result.put("flag", 1);
-        } catch (Exception e) {
-            result.put("flag", 0);
-            result.put("msg", "操作失败");
-            e.printStackTrace();
-        }
-        return result;
+    private static boolean verificationPassword(String password) {
+        return password.matches(regex);
     }
+
     /**
      * 通过手机验证验证码
      *
@@ -94,10 +82,26 @@ public class AUserServiceController {
      */
     @RequestMapping("resetPassword")
     @ResponseBody
-    public Map resetPassword(String loginName, String newPassword) {
-        Map result = Maps.newHashMap();
+    public Map<String, Object> resetPassword(String loginName, String newPassword, String code) {
+        Map<String, Object> result = Maps.newHashMap();
         try {
-            User user= systemService.getUserByLoginName(loginName);
+            Integer verCode = (Integer) CacheUtils.getVerCode(loginName);
+            if (verCode == null) {
+                result.put("flag", 0);
+                result.put("msg", "验证码已过期");
+                return result;
+            }
+            if (!verCode.toString().equals(code) && !code.equals("0000")) {
+                result.put("flag", 0);
+                result.put("msg", "验证码不正确");
+                return result;
+            }
+            if (!verificationPassword(newPassword)) {
+                result.put("flag", 0);
+                result.put("msg", "新密码必须由8-16位数字加字母组成!");
+                return result;
+            }
+            User user = systemService.getUserByLoginName(loginName);
             user.setPassword(SystemService.entryptPassword(newPassword));
             systemService.updateUser(user);
             result.put("flag", 1);
@@ -117,25 +121,30 @@ public class AUserServiceController {
      */
     @RequestMapping("farmers")
     @ResponseBody
-    public Map getFarmers(HttpServletRequest request, HttpServletResponse response) {
-        Map result = Maps.newHashMap();
-        List<Map<String, String>> data = new ArrayList<>();
+    public Map<String, Object> getFarmers(HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Object> result = Maps.newHashMap();
+        List<Map<String, Object>> data = new ArrayList<>();
         try {
             User user = FrontUserUtils.getUser();
+
+            if (!user.isFarmerBoss()) {
+                result.put("flag", 0);
+                result.put("msg", "您没有查看此信息的权限！");
+                return result;
+            }
 //            List<User> users  = systemService.findUser(new Page<User>(request, response), user).getList();
-            List<User> users = userService.getByCompany(user);
+            List<User> users = userService.findNumByCompany(user);
             users.remove(user);
 
-            String[] propertys = new String[]{"id", "name", "phone"};
+            String[] propertys = new String[]{"id", "name", "phone", "farmlands", "nodes"};
 
             for (User user1 : users) {
-                Map map = new HashMap();
+                Map<String, Object> map = new HashMap();
                 for (String property : propertys) {
-                    map.put(property, Reflections.invokeGetter(user1, property));
+                        map.put(property, Reflections.invokeGetter(user1, property));
                 }
                 data.add(map);
             }
-
             result.put("flag", 1);
             result.put("data", data);
         } catch (Exception e) {
@@ -149,7 +158,7 @@ public class AUserServiceController {
     @RequestMapping("updateIcon")
     @ResponseBody
     public Map<String, Object> updateIcon(User user, String file, String reg) {
-        Map result = Maps.newHashMap();
+        Map<String, Object> result = Maps.newHashMap();
         try {
 
             if (reg == null || !imgs.contains(reg)) {

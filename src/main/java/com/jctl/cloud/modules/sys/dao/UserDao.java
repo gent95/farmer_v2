@@ -94,4 +94,6 @@ public interface UserDao extends CrudDao<User> {
 	public void updateChannelId(User user);
 
 	User getBySingleId(String singleId);
+
+    List<User> findNumByCompany(User user);
 }

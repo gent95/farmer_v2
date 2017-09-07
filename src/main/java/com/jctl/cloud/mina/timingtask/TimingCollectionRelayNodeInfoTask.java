@@ -19,7 +19,7 @@ public class TimingCollectionRelayNodeInfoTask {
     }
     /**
      * 定时任务，更新节点信息
-     */
+         */
     @Scheduled(cron = "0 0/5 * * * ?")
     public void collectionRelayAndNodeInfoTask() {
     //处理并发可能因相互竞争造成阻塞

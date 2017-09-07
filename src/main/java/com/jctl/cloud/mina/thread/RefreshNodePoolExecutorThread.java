@@ -15,13 +15,32 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class RefreshNodePoolExecutorThread {
 
-    //初始化一个池
-     private static  ExecutorService nodePoolExecutor = new ThreadPoolExecutor(0, 20,
-            60L, TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>());
+    private RefreshNodePoolExecutorThread() {
+    }
 
-    public  static ExecutorService getNodePoolExecutor(){
+
+    private volatile static ExecutorService nodePoolExecutor;
+
+    public static ExecutorService getNodePoolExecutor() {
+        if (nodePoolExecutor == null) {
+            synchronized (ExecutorService.class) {
+                if (nodePoolExecutor == null) {
+                    nodePoolExecutor = new ThreadPoolExecutor(0, 20,
+                            60L, TimeUnit.SECONDS,
+                            new SynchronousQueue<Runnable>());
+                }
+            }
+        }
         return nodePoolExecutor;
     }
+
+//    //初始化一个池
+//    private static ExecutorService nodePoolExecutor = new ThreadPoolExecutor(0, 20,
+//            60L, TimeUnit.SECONDS,
+//            new SynchronousQueue<Runnable>());
+//
+//    public static ExecutorService getNodePoolExecutor() {
+//        return nodePoolExecutor;
+//    }
 
 }
